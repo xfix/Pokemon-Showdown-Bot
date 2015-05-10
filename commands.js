@@ -263,7 +263,7 @@ exports.commands = {
 		var text = '';
 		if (added.length) {
 			text += 'User' + (added.length > 1 ? 's "' + added.join('", "') + '" were' : ' "' + added[0] + '" was') + ' added to the blacklist.';
-			this.say(room, '/modnote ' + text + ' by' + user.name + '.');
+			this.say(room, '/modnote ' + text + ' by ' + user.name + '.');
 			this.writeSettings();
 		}
 		if (alreadyAdded.length) {
@@ -321,7 +321,7 @@ exports.commands = {
 		// this isn't foolproof, but good enough to catch mistakes.
 		// if a user bypasses this to autoban everyone, then they shouldn't be on the regex autoban whitelist
 		if (/^(?:(?:\.+|[a-z0-9]|\\[a-z0-9SbB])(?![a-z0-9\.\\])(?:[*+]|\{\d+\,(?:\d+)?\})?)+$/i.test(arg)) {
-			return this.say(room, 'Regular expression /' + arg + '/i cannot be added to the blacklist. Proofread your regex so it no longer matches all names.');
+			return this.say(room, 'Regular expression /' + arg + '/i cannot be added to the blacklist. Proofread!');
 		}
 
 		arg = '/' + arg + '/i';
@@ -354,25 +354,24 @@ exports.commands = {
 		if (!this.settings.blacklist) return this.say(room, text + 'No users are blacklisted in this room.');
 
 		var roomid = room.id;
-		var blacklist = this.settings.blacklist[roomid] || this.settings.blacklist;
+		var blacklist = this.settings.blacklist[roomid];
 		if (!blacklist) return this.say(room, text + 'No users are blacklisted in this room.');
 
-		if (arg.length) {
-			let nick = toId(arg);
-			if (!nick || nick.length > 18) {
-				text += 'Invalid username: "' + nick + '".';
-			} else {
-				text += 'User "' + nick + '" is currently ' + (blacklist[nick] || 'not ') + 'blacklisted in ' + roomid + '.';
-			}
-		} else {
+		if (!arg.length) {
 			let userlist = Object.keys(blacklist);
 			if (!userlist.length) return this.say(room, text + 'No users are blacklisted in this room.');
-			this.uploadToHastebin('The following users are banned from ' + roomid + ':\n\n' + userlist.join('\n'), function (link) {
-				if (!link.startsWith('Error')) text += 'Blacklist for room ' + roomid + ': ';
-				text += link;
+			return this.uploadToHastebin('The following users are banned from ' + roomid + ':\n\n' + userlist.join('\n'), function (link) {
+				if (link.startsWith('Error')) return this.say(room, text + link);
+				this.say(room, text + 'Blacklist for room ' + roomid + ': ' + link);
 			}.bind(this));
 		}
 
+		var nick = toId(arg);
+		if (!nick || nick.length > 18) {
+			text += 'Invalid username: "' + nick + '".';
+		} else {
+			text += 'User "' + nick + '" is currently ' + (blacklist[nick] || 'not ') + 'blacklisted in ' + roomid + '.';
+		}
 		this.say(room, text);
 	},
 	banphrase: 'banword',
@@ -390,7 +389,7 @@ exports.commands = {
 			return false;
 		}
 
-		var bannedPhrases = this.settings.bannedphrases ? this.settings.bannedPhrases[tarRoom] : null;
+		var bannedPhrases = this.settings.bannedphrases ? this.settings.bannedphrases[tarRoom] : null;
 		if (!bannedPhrases) {
 			if (bannedPhrases === null) this.settings.bannedphrases = {};
 			bannedPhrases = (this.settings.bannedphrases[tarRoom] = {});
@@ -418,7 +417,7 @@ exports.commands = {
 		if (!arg) return false;
 		if (!this.settings.bannedphrases) return this.say(room, 'Phrase "' + arg + '" is not currently banned.');
 
-		var bannedphrases = this.settings.bannedphrases[tarRoom];
+		var bannedPhrases = this.settings.bannedphrases[tarRoom];
 		if (!bannedPhrases || !bannedPhrases[arg]) return this.say(room, 'Phrase "' + arg + '" is not currently banned.');
 
 		delete bannedPhrases[arg];
@@ -460,11 +459,9 @@ exports.commands = {
 		if (!banList.length) return this.say(room, text + 'No phrases are banned in this room.');
 
 		this.uploadToHastebin('The following phrases are banned ' + bannedFrom + ':\n\n' + banList.join('\n'), function (link) {
-			if (!link.startsWith('Error')) text += 'Banned phrases ' + bannedFrom + ': ';
-			text += link;
+			if (link.startsWith('Error')) return this.say(room, link);
+			this.say(room, text + 'Banned phrases ' + bannedFrom + ': ' + link);
 		}.bind(this));
-
-		this.say(room, text);
 	},
 
 	/**

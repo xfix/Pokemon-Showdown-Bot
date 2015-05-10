@@ -319,9 +319,9 @@ exports.parse = {
 
 		var req = http.request(reqOpts, function (res) {
 			res.on('data', function (chunk) {
-				chunk = chunk.toString();
-				if (chunk.substr(0, 15) === '<!DOCTYPE html>') return callback('Error connecting to Hastebin. Is the site down?');
-				var filename = JSON.parse(chunk).key;
+				// CloudFlare can go to hell for sending the body in a header request like this
+				if (typeof chunk === 'string' && chunk.substr(0, 15) === '<!DOCTYPE html>') return callback('Error uploading to Hastebin.');
+				var filename = JSON.parse(chunk.toString()).key;
 				callback('http://hastebin.com/raw/' + filename);
 			});
 		});
