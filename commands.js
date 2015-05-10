@@ -640,7 +640,7 @@ exports.commands = {
 
 		arg = arg.split(',');
 		var msgType = toId(arg[0]);
-		if (!msgType) return this.say(room, 'Welcome to the Wi-Fi room! Links can be found here: http://pstradingroom.weebly.com/links.html');
+		if (!msgType) return this.say(room, text + 'Welcome to the Wi-Fi room! Links can be found here: http://pstradingroom.weebly.com/links.html');
 
 		switch (msgType) {
 		case 'intro': 
