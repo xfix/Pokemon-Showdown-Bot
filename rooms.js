@@ -77,6 +77,7 @@ class Room {
 	onLeave(username) {
 		var user = Users.get(username);
 		this.users.delete(user.id);
+		user.rooms.delete(this.id);
 		if (user.rooms.size) return user;
 		user.destroy();
 		return null;
