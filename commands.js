@@ -673,41 +673,55 @@ exports.commands = {
 			return this.say(room, text + 'Wi-Fi Room Pokemon League: http://tinyurl.com/wifiroomleague');
 		case 'checkfc':
 			if (!Config.googleapikey) return this.say(room, text + 'A Google API key has not been provided and is required for this command to work.');
-			if (arg.length < 2) return this.say(room, text + 'Usage: .wifi checkfc, [fc]');
+			if (arg.length !== 2) return this.say(room, text + 'Usage: .wifi checkfc, [fc]');
+
 			let wifiRoom = room.id === 'wifi' ? room : Rooms.get('wifi');
 			if (!wifiRoom) return false;
 			if (!wifiRoom.data) wifiRoom.data = {
 				docRevs: ['', ''],
 				scammers : {},
-				cloners: []
+				cloners: {}
 			};
+
 			let wifiData = wifiRoom.data;
-			var self = this;
+			let self = this;
 			this.getDocMeta('0AvygZBLXTtZZdFFfZ3hhVUplZm5MSGljTTJLQmJScEE', function (err, meta) {
 				if (err) return self.say(room, text + 'An error occured while processing your command.');
-				let value = arg[1].replace(/\D/g, '');
-				if (value.length !== 12) return self.say(room, text + '"' + arg[1] + '" is not a valid FC.');
-				if (wifiData.docRevs[1] === meta.version) {
-					value = wifiData.scammers[value];
-					if (value) return self.say(room, text + '**The FC ' + arg[1] + ' belongs to a known scammer: ' + (value.length > 61 ? value + '..' : value) + '.**');
-					return self.say(room, text + 'This FC does not belong to a known scammer.');
+
+				let fc = arg[1].replace(/\D/g, '');
+				if (fc.length !== 12) return self.say(room, text + '"' + arg[1] + '" is not a valid FC.');
+
+				if (wifiData.docRevs[0] === meta.version) {
+					let ids = wifiData.scammers[fc];
+					if (!ids) return self.say(room, text + 'This FC does not belong to a known scammer.');
+
+					text += '**The FC ' + arg[1] + ' belongs to a known scammer:** ';
+					let max = 300 - text.length;
+					if (ids.length >= max) return self.say(room, text + ids.substr(0, max - 3) + '...');
+					return self.say(room, text + ids + '.');
 				}
-				wifiData.docRevs[1] = meta.version;
+
+				wifiData.docRevs[0] = meta.version;
 				self.getDocCsv(meta, function (data) {
 					csv(data, function (err, data) {
 						if (err) return self.say(room, text + 'An error occured while processing your command.');
 						for (let i = 0; i < data.length; i++) {
-							let str = data[i][1].replace(/\D/g, '');
-							let strLen = str.length;
-							if (str && strLen > 11) {
-								for (let j = 0; j < strLen; j += 12) {
-									wifiData.scammers[str.substr(j, 12)] = data[i][0];
+							let fc = data[i][1].replace(/\D/g, '');
+							if (fc && fc.length % 12 === 0) {
+								let ids = data[i][0];
+								for (let j = 0; j < fc.length; j += 12) {
+									wifiData.scammers[fc.substr(j, 12)] = ids;
 								}
 							}
 						}
-						value = wifiData.scammers[value];
-						if (value) return self.say(room, text + '**The FC ' + arg[1] + ' belongs to a known scammer: ' + (value.length > 61 ? value.substr(0, 61) + '..' : value) + '.**');
-						return self.say(room, text + 'This FC does not belong to a known scammer.');
+
+						let ids = wifiData.scammers[fc];
+						if (!ids) return self.say(room, text + 'This FC does not belong to a known scammer.');
+
+						text += '**The FC ' + arg[1] + ' belongs to a known scammer:** ';
+						let max = 300 - text.length;
+						if (ids.length >= max) return self.say(room, text + ids.substr(0, max - 3) + '...');
+						self.say(room, text + ids + '.');
 					});
 				});
 			});
@@ -720,61 +734,53 @@ exports.commands = {
 			if (!wifiRoom.data) wifiRoom.data = {
 				docRevs: ['', ''],
 				scammers : {},
-				cloners: []
+				cloners: {}
 			};
 			let wifiData = wifiRoom.data;
-			var self = this;
+			let self = this;
 			self.getDocMeta('0Avz7HpTxAsjIdFFSQ3BhVGpCbHVVdTJ2VVlDVVV6TWc', function (err, meta) {
-				if (err) return self.say(room, text + 'An error occured while processing your command. Please report this!');
+				if (err) return self.say(room, text + 'An error occured while processing your command.');
 				if (room !== user && !text) text += '/pm ' + user.id + ', ';
-				if (wifiData.docRevs[0] === meta.version) {
+				if (wifiData.docRevs[1] === meta.version) {
 					let found = [];
 					let cloners = wifiData.cloners;
-					for (let i in cloners) {
-						let cloner = cloners[i];
-						if (wifiRoom.users.get(toId(cloner[0]))) {
-							found.push('Name: ' + cloner[0] + ' | FC: ' + cloner[1] + ' | IGN: ' + cloner[2]);
+					for (let id in cloners) {
+						if (wifiRoom.users.get(id)) {
+							found.push(cloners[id]);
 						}
 					}
-					if (!found.length) return self.say(room, text + 'No cloners were found online.');
 
-					let foundStr = found.join(', ');
-					if (foundStr.length > 266) {
-						return self.uploadToHastebin("The following cloners are online :\n\n" + found.join('\n'), function (link) {
-							self.say(room, text + link);
-						});
-					}
-					return self.say(room, text + "The following cloners are online: " + foundStr);
+					if (!found.length) return self.say(room, text + 'No cloners were found online.');
+					return self.uploadToHastebin('The following cloners are online :\n\n' + found.join('\n'), function (link) {
+						self.say(room, text + 'The following cloners are online: ' + link);
+					});
 				}
 
-				self.say(room, text + 'Cloners List changed. Updating...');
-				wifiData.docRevs[0] = meta.version;
+				self.say(room, text + 'Cloners list changed. Updating...');
+				wifiData.docRevs[1] = meta.version;
 				self.getDocCsv(meta, function (data) {
 					csv(data, function (err, data) {
-						if (err) return this.say(room, text + 'An error occured while processing your command. Please report this!');
+						if (err) return this.say(room, text + 'An error occured while processing your command.');
 
-						let cloners = wifiData.cloners;
+						let cloners = wifiData.cloners = {};
+						let found = [];
 						for (let i = 0; i < data.length; i++) {
 							let cloner = data[i];
-							let str = cloner[1].replace(/\D/g, '');
-							if (str && str.length >= 12) {
-								cloners.push([cloner[0], cloner[1], cloner[2]]);
+							let fc = cloner[1].replace(/\D/g, '');
+							if (fc && fc.length === 12) {
+								let id = toId(cloner[0]);
+								let clonerText = 'Name: ' + cloner[0] + ' | FC: ' + cloner[1] + ' | IGN: ' + cloner[2];
+								clonerText = clonerText.replace(/\n/g, '');
+								cloners[id] = clonerText;
+								if (wifiRoom.users.get(id)) {
+									found.push(clonerText);
+								}
 							}
 						}
 
-						let found = [];
-						for (let i in cloners) {
-							let cloner = cloners[i];
-							if (wifiRoom.users.get(toId(cloner[0]))) {
-								found.push('Name: ' + cloner[0] + ' | FC: ' + cloner[1] + ' | IGN: ' + cloner[2]);
-							}
-						}
 						if (!found.length) return self.say(room, text + 'No cloners were found online.');
-
-						let foundStr = found.join(', ');
-						if (foundStr.length < 267) return self.say(room, text + "The following cloners are online :\n\n" + foundStr);
 						self.uploadToHastebin("The following cloners are online :\n\n" + found.join('\n'), function (link) {
-							self.say(room, text + link);
+							self.say(room, text + 'The following cloners are online: ' + link);
 						});
 					});
 				});
