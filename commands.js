@@ -519,7 +519,8 @@ exports.commands = {
 		this.say(room, text);
 	},
 	'8ball': function (arg, user, room) {
-		var text = (room === user || user.canUse('8ball', room)) ? '' : '/pm ' + user.id + ', ';
+		if (room === user) return false;
+		var text = user.canUse('8ball', room) ? '' : '/pm ' + user.id + ', ';
 		var rand = ~~(20 * Math.random());
 
 		switch (rand) {
@@ -729,6 +730,7 @@ exports.commands = {
 		case 'ocloners':
 		case 'onlinecloners':
 			if (!Config.googleapikey) return this.say(room, text + 'A Google API key has not been provided and is required for this command to work.');
+
 			let wifiRoom = room.id === 'wifi' ? room : Rooms.get('wifi');
 			if (!wifiRoom) return false;
 			if (!wifiRoom.data) wifiRoom.data = {
@@ -736,18 +738,18 @@ exports.commands = {
 				scammers : {},
 				cloners: {}
 			};
+
 			let wifiData = wifiRoom.data;
 			let self = this;
 			self.getDocMeta('0Avz7HpTxAsjIdFFSQ3BhVGpCbHVVdTJ2VVlDVVV6TWc', function (err, meta) {
 				if (err) return self.say(room, text + 'An error occured while processing your command.');
+
 				if (room !== user && !text) text += '/pm ' + user.id + ', ';
 				if (wifiData.docRevs[1] === meta.version) {
-					let found = [];
 					let cloners = wifiData.cloners;
+					let found = [];
 					for (let id in cloners) {
-						if (wifiRoom.users.get(id)) {
-							found.push(cloners[id]);
-						}
+						if (wifiRoom.users.get(id)) found.push(cloners[id]);
 					}
 
 					if (!found.length) return self.say(room, text + 'No cloners were found online.');
@@ -756,7 +758,6 @@ exports.commands = {
 					});
 				}
 
-				self.say(room, text + 'Cloners list changed. Updating...');
 				wifiData.docRevs[1] = meta.version;
 				self.getDocCsv(meta, function (data) {
 					csv(data, function (err, data) {
