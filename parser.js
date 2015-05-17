@@ -177,7 +177,7 @@ exports.parse = {
 				let user = Users.get(username);
 				if (!user) return false; // various "chat" responses contain other data
 				if (user.isSelf) return false;
-				if (this.isBlacklisted(user.id, room.id)) return this.say(room, '/roomban ' + user.id + ', Blacklisted user');
+				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
 
 				spl = spl.slice(3).join('|');
 				if (!user.hasRank(room, '%')) this.processChatData(user.id, room.id, spl);
@@ -188,7 +188,7 @@ exports.parse = {
 				let user = Users.get(username);
 				if (!user) return false; // various "chat" responses contain other data
 				if (user.isSelf) return false;
-				if (this.isBlacklisted(user.id, room.id)) return this.say(room, '/roomban ' + user.id + ', Blacklisted user');
+				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
 
 				spl = spl.slice(4).join('|');
 				if (!user.hasRank(room, '%')) this.processChatData(user.id, room.id, spl);
@@ -211,14 +211,14 @@ exports.parse = {
 				let username = spl[2];
 				let oldid = spl[3];
 				let user = room.onRename(username, oldid);
-				if (this.isBlacklisted(user.id, room.id)) return this.say(room, '/roomban ' + user.id + ', Blacklisted user');
+				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
 				this.updateSeen(oldid, spl[1], user.id);
 				break;
 			case 'J': case 'j':
 				let username = spl[2];
 				let user = room.onJoin(username, username.charAt(0));
 				if (user.isSelf) return false;
-				if (this.isBlacklisted(user.id, room.id)) return this.say(room, '/roomban ' + user.id + ', Blacklisted user');
+				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
 				this.updateSeen(user.id, spl[1], room.id);
 				break;
 			case 'l': case 'L':
