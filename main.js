@@ -129,14 +129,14 @@ global.Commands = require('./commands.js').commands;
 global.Users = require('./users.js');
 global.Rooms = require('./rooms.js');
 global.Parse = require('./parser.js').parse;
+global.Connection = null;
 
-var connection = null;
 var queue = [];
 var dequeueTimeout = null;
 var lastSentAt = 0;
 
 global.send = function (data) {
-	if (!connection.connected) return false;
+	if (!Connection.connected) return false;
 	
 	var now = Date.now();
 	if (now < lastSentAt + MESSAGE_THROTTLE - 5) {
@@ -150,7 +150,7 @@ global.send = function (data) {
 	if (!Array.isArray(data)) data = [data.toString()];
 	data = JSON.stringify(data);
 	dsend(data);
-	connection.send(data);
+	Connection.send(data);
 
 	lastSentAt = now;
 	if (dequeueTimeout) {
@@ -183,7 +183,7 @@ var connect = function (retry) {
 	});
 
 	ws.on('connect', function (con) {
-		connection = con;
+		Connection = con;
 		ok('connected to server ' + Config.server);
 
 		con.on('error', function (err) {
