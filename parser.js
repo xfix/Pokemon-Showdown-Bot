@@ -176,7 +176,7 @@ exports.parse = {
 				let username = spl[2];
 				let user = Users.get(username);
 				if (!user) return false; // various "chat" responses contain other data
-				if (user.isSelf) return false;
+				if (user === Users.self) return false;
 				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
 
 				spl = spl.slice(3).join('|');
@@ -187,7 +187,7 @@ exports.parse = {
 				let username = spl[3];
 				let user = Users.get(username);
 				if (!user) return false; // various "chat" responses contain other data
-				if (user.isSelf) return false;
+				if (user === Users.self) return false;
 				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
 
 				spl = spl.slice(4).join('|');
@@ -198,7 +198,7 @@ exports.parse = {
 				let username = spl[2];
 				let user = Users.get(username);
 				if (!user) user = Users.add(username);
-				if (user.isSelf) return false;
+				if (user === Users.self) return false;
 
 				spl = spl.slice(4).join('|');
 				if (spl.startsWith('/invite ') && Config.groups.indexOf(username.charAt(0)) >= Config.groups.indexOf('%') &&
@@ -217,7 +217,7 @@ exports.parse = {
 			case 'J': case 'j':
 				let username = spl[2];
 				let user = room.onJoin(username, username.charAt(0));
-				if (user.isSelf) return false;
+				if (user === Users.self) return false;
 				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
 				this.updateSeen(user.id, spl[1], room.id);
 				break;
@@ -225,7 +225,7 @@ exports.parse = {
 				let username = spl[2];
 				let user = room.onLeave(username);
 				if (user) {
-					if (user.isSelf) return false;
+					if (user === Users.self) return false;
 					this.updateSeen(user.id, spl[1], room.id);
 				} else {
 					this.updateSeen(toId(username), spl[1], room.id);

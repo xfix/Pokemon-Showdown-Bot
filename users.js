@@ -25,7 +25,6 @@ class User {
 	constructor(username, roomid) {
 		this.name = username.substr(1);
 		this.id = toId(this.name);
-		this.isSelf = (this.id === toId(Config.nick));
 		this.isExcepted = Config.excepts.includes(this.id);
 		this.isWhitelisted = Config.whitelist.includes(this.id);
 		this.isRegexWhitelisted = Config.regexautobanwhitelist.includes(this.id);
