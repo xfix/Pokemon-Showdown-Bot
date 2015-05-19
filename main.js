@@ -140,10 +140,10 @@ global.send = function (data) {
 	
 	var now = Date.now();
 	if (now < lastSentAt + MESSAGE_THROTTLE - 5) {
+		queue.push(data);
 		if (!dequeueTimeout) {
 			dequeueTimeout = setTimeout(dequeue, now - lastSentAt + MESSAGE_THROTTLE);
 		}
-		queue.push(data);
 		return false;
 	}
 
