@@ -41,22 +41,21 @@ class User {
 		return Config.regexautobanwhitelist.includes(this.id);
 	}
 
-	hasRank (room, tarGroup) {
+	hasRank (roomid, tarGroup) {
 		if (this.isExcepted) return true;
-		var group = room.users.get(this.id);
+		var group = this.rooms.get(roomid);
 		return Config.groups.indexOf(group) >= Config.groups.indexOf(tarGroup);
 	}
 
-	canUse (cmd, room) {
+	canUse (cmd, roomid) {
 		var settings = Parse.settings[cmd];
-		var roomid = room.id;
 		if (!settings || !settings[roomid]) {
-			return this.hasRank(room, (cmd === 'autoban' || cmd === 'blacklist') ? '#' : Config.defaultrank);
+			return this.hasRank(roomid, (cmd === 'autoban' || cmd === 'blacklist') ? '#' : Config.defaultrank);
 		}
 
 		var setting = settings[roomid];
 		if (setting === true) return true;
-		return this.hasRank(room, setting);
+		return this.hasRank(roomid, setting);
 	}
 
 	rename (username) {
