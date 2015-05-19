@@ -25,20 +25,29 @@ class User {
 	constructor(username, roomid) {
 		this.name = username.substr(1);
 		this.id = toId(this.name);
-		this.isExcepted = Config.excepts.includes(this.id);
-		this.isWhitelisted = Config.whitelist.includes(this.id);
-		this.isRegexWhitelisted = Config.regexautobanwhitelist.includes(this.id);
 		this.rooms = new Map();
 		if (roomid) this.rooms.set(roomid, username.charAt(0));
 	}
 
-	hasRank(room, tarGroup) {
+	isExcepted () {
+		return Config.excepts.includes(this.id);
+	}
+
+	isWhitelisted () {
+		return Config.whitelist.includes(this.id);
+	}
+
+	isRegexWhitelisted () {
+		return Config.regexautobanwhitelist.includes(this.id);
+	}
+
+	hasRank (room, tarGroup) {
 		if (this.isExcepted) return true;
 		var group = room.users.get(this.id);
 		return Config.groups.indexOf(group) >= Config.groups.indexOf(tarGroup);
 	}
 
-	canUse(cmd, room) {
+	canUse (cmd, room) {
 		var settings = Parse.settings[cmd];
 		var roomid = room.id;
 		if (!settings || !settings[roomid]) {
@@ -50,19 +59,16 @@ class User {
 		return this.hasRank(room, setting);
 	}
 
-	rename(username) {
+	rename (username) {
 		var oldid = this.id;
 		delete users[oldid];
 		this.id = toId(username);
 		this.name = username.substr(1);
-		this.isExcepted = Config.excepts.includes(this.id);
-		this.isWhitelisted = Config.whitelist.includes(this.id);
-		this.isRegexWhitelisted = Config.regexautobanwhitelist.includes(this.id);
 		users[this.id] = this;
 		return this;
 	}
 
-	destroy() {
+	destroy () {
 		this.rooms.forEach(function (group, roomid) {
 			var room = Rooms.get(roomid);
 			room.users.delete(this.id);
