@@ -837,7 +837,7 @@ exports.commands = {
 		// info for The Happy Place
 		if (Config.serverid !== 'showdown') return false;
 		var text = '';
-		if (room === 'thehappyplace') {
+		if (room.id === 'thehappyplace') {
 			if (!user.canUse('happy', room)) text += '/pm ' + user.id + ', ';
 		} else if (room !== user) {
 			return false;
