@@ -11,6 +11,43 @@ if (Config.serverid === 'showdown') {
 	var csv = require('csv-parse');
 }
 
+// .set constants
+const CONFIGURABLE_COMMANDS = {
+	autoban: true,
+	banword: true,
+	say: true,
+	joke: true,
+	usagestats: true,
+	'8ball': true,
+	guia: true,
+	studio: true,
+	wifi: true,
+	monotype: true,
+	survivor: true,
+	happy: true,
+	buzz: true
+};
+
+const CONFIGURABLE_MODERATION_OPTIONS = {
+	flooding: true,
+	caps: true,
+	stretching: true,
+	bannedwords: true
+};
+
+const CONFIGURABLE_COMMAND_LEVELS = {
+	off: false,
+	disable: false,
+	'false': false,
+	on: true,
+	enable: true,
+	'true': true
+};
+
+for (let i in Config.groups) {
+	if (i !== ' ') CONFIGURABLE_COMMAND_LEVELS[i] = i;
+}
+
 exports.commands = {
 	/**
 	 * Help commands
@@ -128,43 +165,22 @@ exports.commands = {
 	set: function (arg, user, room) {
 		if (room === user || !user.hasRank(room.id, '#')) return false;
 
-		var settable = {
-			autoban: 1,
-			banword: 1,
-			say: 1,
-			joke: 1,
-			usagestats: 1,
-			'8ball': 1,
-			guia: 1,
-			studio: 1,
-			wifi: 1,
-			monotype: 1,
-			survivor: 1,
-			happy: 1,
-			buzz: 1
-		};
-		var modOpts = {
-			flooding: 1,
-			caps: 1,
-			stretching: 1,
-			bannedwords: 1
-		};
-
 		var opts = arg.split(',');
 		var cmd = toId(opts[0]);
-		var setting;
+		var roomid = room.id;
 		if (cmd === 'm' || cmd === 'mod' || cmd === 'modding') {
-			let modOpt = toId(opts[1]);
-			if (!modOpts[modOpt]) return this.say(room, 'Incorrect command: correct syntax is ' + Config.commandcharacter + 'set mod, [' +
-				Object.keys(modOpts).join('/') + '](, [on/off])');
+			let modOpt;
+			if (!opts[1] || !CONFIGURABLE_MODERATION_OPTIONS[(modOpt = toId(opts[1]))]) {
+				return this.say(room, 'Incorrect command: correct syntax is ' + Config.commandcharacter + 'set mod, [' +
+					Object.keys(CONFIGURABLE_MODERATION_OPTIONS).join('/') + '](, [on/off])');
+			}
+			if (!opts[2]) return this.say(room, 'Moderation for ' + modOpt + ' in this room is currently ' +
+				(this.settings.modding && this.settings.modding[roomid] && modOpt in this.settings.modding[roomid] ? 'OFF' : 'ON') + '.');
 
-			setting = toId(opts[2]);
-			if (!setting) return this.say(room, 'Moderation for ' + modOpt + ' in this room is currently ' +
-				(this.settings.modding[room] && modOpt in this.settings.modding[room] ? 'OFF' : 'ON') + '.');
-
-			let roomid = room.id;
 			if (!this.settings.modding) this.settings.modding = {};
 			if (!this.settings.modding[roomid]) this.settings.modding[roomid] = {};
+
+			let setting = toId(opts[2]);
 			if (setting === 'on') {
 				delete this.settings.modding[roomid][modOpt];
 				if (Object.isEmpty(this.settings.modding[roomid])) delete this.settings.modding[roomid];
@@ -173,7 +189,7 @@ exports.commands = {
 				this.settings.modding[roomid][modOpt] = 0;
 			} else {
 				return this.say(room, 'Incorrect command: correct syntax is ' + Config.commandcharacter + 'set mod, [' +
-					Object.keys(modOpts).join('/') + '](, [on/off])');
+					Object.keys(CONFIGURABLE_MODERATION_OPTIONS).join('/') + '](, [on/off])');
 			}
 
 			this.writeSettings();
@@ -187,7 +203,7 @@ exports.commands = {
 			if (typeof Commands[cmd] === 'string') {
 				cmd = Commands[cmd];
 			} else if (typeof Commands[cmd] === 'function') {
-				if (cmd in settable) break;
+				if (cmd in CONFIGURABLE_COMMANDS) break;
 				return this.say(room, 'The settings for ' + Config.commandcharacter + '' + opts[0] + ' cannot be changed.');
 			} else {
 				return this.say(room, 'Something went wrong. PM Morfent or TalkTakesTime here or on Smogon with the command you tried.');
@@ -196,28 +212,11 @@ exports.commands = {
 			if (++failsafe > 5) return this.say(room, 'The command "' + Config.commandcharacter + '' + opts[0] + '" could not be found.');
 		}
 
-		var settingsLevels = {
-			off: false,
-			disable: false,
-			'false': false,
-			'+': '+',
-			'%': '%',
-			'@': '@',
-			'#': '#',
-			'&': '&',
-			'~': '~',
-			on: true,
-			enable: true,
-			'true': true
-		};
-
-		var roomid = room.id;
-		setting = opts[1].trim().toLowerCase();
-		if (!setting) {
+		if (!opts[1]) {
 			let msg = '' + Config.commandcharacter + '' + cmd + ' is ';
 			if (!this.settings[cmd] || (!(roomid in this.settings[cmd]))) {
 				msg += 'available for users of rank ' + ((cmd === 'autoban' || cmd === 'banword') ? '#' : Config.defaultrank) + ' and above.';
-			} else if (this.settings[cmd][roomid] in settingsLevels) {
+			} else if (this.settings[cmd][roomid] in CONFIGURABLE_COMMAND_LEVELS) {
 				msg += 'available for users of rank ' + this.settings[cmd][roomid] + ' and above.';
 			} else {
 				msg += this.settings[cmd][roomid] ? 'available for all users in this room.' : 'not available for use in this room.';
@@ -226,13 +225,14 @@ exports.commands = {
 			return this.say(room, msg);
 		}
 
-		if (!(setting in settingsLevels)) return this.say(room, 'Unknown option: "' + setting + '". Valid settings are: off/disable/false, +, %, @, #, &, ~, on/enable/true.');
+		let setting = toId(opts[1]);
+		if (!(setting in CONFIGURABLE_COMMAND_LEVELS)) return this.say(room, 'Unknown option: "' + setting + '". Valid settings are: off/disable/false, +, %, @, #, &, ~, on/enable/true.');
 		if (!this.settings[cmd]) this.settings[cmd] = {};
-		this.settings[cmd][roomid] = settingsLevels[setting];
+		this.settings[cmd][roomid] = CONFIGURABLE_COMMAND_LEVELS[setting];
 
 		this.writeSettings();
 		this.say(room, 'The command ' + Config.commandcharacter + '' + cmd + ' is now ' +
-			(settingsLevels[setting] === setting ? ' available for users of rank ' + setting + ' and above.' :
+			(CONFIGURABLE_COMMAND_LEVELS[setting] === setting ? ' available for users of rank ' + setting + ' and above.' :
 			(this.settings[cmd][roomid] ? 'available for all users in this room.' : 'unavailable for use in this room.')));
 	},
 	blacklist: 'autoban',
