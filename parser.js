@@ -364,8 +364,8 @@ exports.parse = {
 			if ((useDefault || !this.settings.banword[roomid]) && pointVal < 2) {
 				let bannedPhraseSettings = this.settings.bannedphrases;
 				let bannedPhrases = !!bannedPhraseSettings ? (Object.keys(bannedPhraseSettings[roomid] || {})).concat(Object.keys(bannedPhraseSettings.global || {})) : [];
-				for (let i = 0; i < bannedPhrases.length; i++) {
-					if (msg.toLowerCase().indexOf(bannedPhrases[i]) > -1) {
+				for (let bannedPhrase of bannedPhrases) {
+					if (msg.toLowerCase().indexOf(bannedPhrase) > -1) {
 						pointVal = 2;
 						muteMessage = ', Automated response: your message contained a banned phrase';
 						break;
@@ -438,8 +438,8 @@ exports.parse = {
 				let newTimes = [];
 				let now = Date.now();
 				let times = roomData.times;
-				for (let i = 0, len = times.length; i < len; i++) {
-					if (now - times[i] < 5 * 1000) newTimes.push(times[i]);
+				for (let time of times) {
+					if (now - time < 5 * 1000) newTimes.push(time);
 				}
 				newTimes.sort(function (a, b) {
 					return a - b;
@@ -540,18 +540,18 @@ exports.parse = {
 		var uncache = [require.resolve(root)];
 		do {
 			let newuncache = [];
-			for (let i = 0; i < uncache.length; ++i) {
-				if (require.cache[uncache[i]]) {
+			for (let i of uncache) {
+				if (require.cache[i]) {
 					newuncache.push.apply(newuncache,
-						require.cache[uncache[i]].children.map(function (module) {
+						require.cache[i].children.map(function (module) {
 							return module.filename;
 						})
 					);
-					delete require.cache[uncache[i]];
+					delete require.cache[i];
 				}
 			}
 			uncache = newuncache;
-		} while (uncache.length > 0);
+		} while (uncache.length);
 	},
 	getDocMeta: function (id, callback) {
 		https.get('https://www.googleapis.com/drive/v2/files/' + id + '?key=' + Config.googleapikey, function (res) {

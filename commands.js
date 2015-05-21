@@ -248,8 +248,8 @@ exports.commands = {
 		var illegalNick = [];
 		var alreadyAdded = [];
 		var roomid = room.id;
-		for (let i = 0; i < arg.length; i++) {
-			let tarUser = toId(arg[i]);
+		for (let u of arg) {
+			let tarUser = toId(u);
 			if (!tarUser || tarUser.length > 18) {
 				illegalNick.push(tarUser);
 			} else if (!this.blacklistUser(tarUser, roomid)) {
@@ -284,8 +284,8 @@ exports.commands = {
 		var removed = [];
 		var notRemoved = [];
 		var roomid = room.id;
-		for (let i = 0; i < arg.length; i++) {
-			let tarUser = toId(arg[i]);
+		for (let u of arg) {
+			let tarUser = toId(u);
 			if (!tarUser || tarUser.length > 18) {
 				notRemoved.push(tarUser);
 			} else if (!this.unblacklistUser(tarUser, roomid)) {
@@ -715,10 +715,10 @@ exports.commands = {
 				self.getDocCsv(meta, function (data) {
 					csv(data, function (err, data) {
 						if (err) return self.say(room, text + 'An error occured while processing your command.');
-						for (let i = 0; i < data.length; i++) {
-							let fc = data[i][1].replace(/\D/g, '');
+						for (let scammer of data) {
+							let fc = scammer[1].replace(/\D/g, '');
 							if (fc && fc.length % 12 === 0) {
-								let ids = data[i][0];
+								let ids = scammer[0];
 								for (let j = 0; j < fc.length; j += 12) {
 									wifiData.scammers[fc.substr(j, 12)] = ids;
 								}
@@ -774,8 +774,7 @@ exports.commands = {
 
 						let cloners = wifiData.cloners = {};
 						let found = [];
-						for (let i = 0; i < data.length; i++) {
-							let cloner = data[i];
+						for (let cloner of data) {
 							let fc = cloner[1].replace(/\D/g, '');
 							if (fc && fc.length === 12) {
 								let id = toId(cloner[0]);
