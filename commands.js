@@ -62,7 +62,7 @@ exports.commands = {
 		this.say(room, text);
 	},
 	git: function (arg, user, room) {
-		var text = (room === user || user.isExcepted) ? '' : '/pm ' + user.id + ', ';
+		var text = (room === user || user.isExcepted()) ? '' : '/pm ' + user.id + ', ';
 		text += '**Pokemon Showdown Bot** source code: ' + Config.fork;
 		this.say(room, text);
 	},
@@ -86,7 +86,7 @@ exports.commands = {
 	 */
 
 	reload: function (arg, user, room) {
-		if (!user.isExcepted) return false;
+		if (!user.isExcepted()) return false;
 		try {
 			this.uncacheTree('./commands.js');
 			Commands = require('./commands.js').commands;
@@ -96,7 +96,7 @@ exports.commands = {
 		}
 	},
 	custom: function (arg, user, room) {
-		if (!user.isExcepted) return false;
+		if (!user.isExcepted()) return false;
 		// Custom commands can be executed in an arbitrary room using the syntax
 		// ".custom [room] command", e.g., to do !data pikachu in the room lobby,
 		// the command would be ".custom [lobby] !data pikachu". However, using
@@ -112,7 +112,7 @@ exports.commands = {
 		this.say(tarRoom, arg);
 	},
 	js: function (arg, user, room) {
-		if (!user.isExcepted) return false;
+		if (!user.isExcepted()) return false;
 		try {
 			let result = eval(arg.trim());
 			this.say(room, JSON.stringify(result));
@@ -121,7 +121,7 @@ exports.commands = {
 		}
 	},
 	uptime: function (arg, user, room) {
-		var text = ((room === user || user.isExcepted) ? '' : '/pm ' + user.id + ', ') + '**Uptime:** ';
+		var text = ((room === user || user.isExcepted()) ? '' : '/pm ' + user.id + ', ') + '**Uptime:** ';
 		var divisors = [52, 7, 24, 60, 60];
 		var units = ['week', 'day', 'hour', 'minute', 'second'];
 		var buffer = [];
@@ -307,7 +307,7 @@ exports.commands = {
 	},
 	rab: 'regexautoban',
 	regexautoban: function (arg, user, room) {
-		if (room === user || !user.isRegexWhitelisted || !user.canUse('autoban', room.id)) return false;
+		if (room === user || !user.isRegexWhitelisted() || !user.canUse('autoban', room.id)) return false;
 		if (!Users.self.hasRank(room.id, '@')) return this.say(room, Users.self.name + ' requires rank of @ or higher to (un)blacklist.');
 		if (!arg) return this.say(room, 'You must specify a regular expression to (un)blacklist.');
 
@@ -333,7 +333,7 @@ exports.commands = {
 	},
 	unrab: 'unregexautoban',
 	unregexautoban: function (arg, user, room) {
-		if (room === user || !user.isRegexWhitelisted || !user.canUse('autoban', room.id)) return false;
+		if (room === user || !user.isRegexWhitelisted() || !user.canUse('autoban', room.id)) return false;
 		if (!Users.self.hasRank(room.id, '@')) return this.say(room, Users.self.name + ' requires rank of @ or higher to (un)blacklist.');
 		if (!arg) return this.say(room, 'You must specify a regular expression to (un)blacklist.');
 
@@ -381,7 +381,7 @@ exports.commands = {
 
 		var tarRoom = room.id;
 		if (room === user) {
-			if (!user.isExcepted) return false;
+			if (!user.isExcepted()) return false;
 			tarRoom = 'global';
 		} else if (user.canUse('banword', room.id)) {
 			tarRoom = room.id;
@@ -405,7 +405,7 @@ exports.commands = {
 	unbanword: function (arg, user, room) {
 		var tarRoom;
 		if (room === user) {
-			if (!user.isExcepted) return false;
+			if (!user.isExcepted()) return false;
 			tarRoom = 'global';
 		} else if (user.canUse('banword', room.id)) {
 			tarRoom = room.id;
@@ -436,7 +436,7 @@ exports.commands = {
 		var text = '';
 		var bannedFrom = '';
 		if (room === user) {
-			if (!user.isExcepted) return false;
+			if (!user.isExcepted()) return false;
 			tarRoom = 'global';
 			bannedFrom += 'globally';
 		} else if (user.canUse('banword', room.id)) {
