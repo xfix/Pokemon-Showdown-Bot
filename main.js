@@ -33,7 +33,7 @@ function runNpm(command) {
 
 // First dependencies and welcome message
 try {
-	require('babel/register');
+	require('babel/register')({loose: 'all'});
 	require('sugar');
 	global.colors = require('colors');
 } catch (e) {
