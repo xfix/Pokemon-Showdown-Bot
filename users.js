@@ -22,7 +22,7 @@ var addUser = Users.add = function (username, room) {
 };
 
 class User {
-	constructor(username, roomid) {
+	constructor (username, roomid) {
 		this.name = username.substr(1);
 		this.id = toId(this.name);
 		this.rooms = new Map();
@@ -42,12 +42,13 @@ class User {
 	}
 
 	hasRank (roomid, tarGroup) {
-		if (this.isExcepted) return true;
+		if (this.isExcepted()) return true;
 		var group = this.rooms.get(roomid) || roomid; // PM messages use the roomid parameter as the user's group
 		return Config.groups[group] >= Config.groups[tarGroup];
 	}
 
 	canUse (cmd, roomid) {
+		if (this.isExcepted()) return true;
 		var settings = Parse.settings[cmd];
 		if (!settings || !settings[roomid]) {
 			return this.hasRank(roomid, (cmd === 'autoban' || cmd === 'blacklist') ? '#' : Config.defaultrank);
