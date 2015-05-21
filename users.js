@@ -43,8 +43,8 @@ class User {
 
 	hasRank (roomid, tarGroup) {
 		if (this.isExcepted) return true;
-		var group = this.rooms.get(roomid);
-		return Config.groups.indexOf(group) >= Config.groups.indexOf(tarGroup);
+		var group = this.rooms.get(roomid) || roomid; // PM messages use the roomid parameter as the user's group
+		return Config.groups[group] >= Config.groups[tarGroup];
 	}
 
 	canUse (cmd, roomid) {

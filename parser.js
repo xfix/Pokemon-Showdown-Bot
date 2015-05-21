@@ -197,11 +197,12 @@ exports.parse = {
 			case 'pm':
 				let username = spl[2];
 				let user = Users.get(username);
+				let group = username.charAt(0);
 				if (!user) user = Users.add(username);
 				if (user === Users.self) return false;
 
 				spl = spl.slice(4).join('|');
-				if (spl.startsWith('/invite ') && Config.groups.indexOf(username.charAt(0)) >= Config.groups.indexOf('%') &&
+				if (spl.startsWith('/invite ') && user.hasRank(group, '%') &&
 						!(toId(spl.substr(8)) === 'lobby' && Config.serverid === 'showdown')) {
 					return send('|/join ' + spl.substr(8));
 				}
