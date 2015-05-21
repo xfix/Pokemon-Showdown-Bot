@@ -317,19 +317,28 @@ exports.commands = {
 			return this.say(room, e.message);
 		}
 
-		// checks if the user is attempting to autoban everyone
-		// this isn't foolproof, but good enough to catch mistakes.
-		// if a user bypasses this to autoban everyone, then they shouldn't be on the regex autoban whitelist
-		if (/^(?:(?:\.+|[a-z0-9]|\\[a-z0-9SbB])(?![a-z0-9\.\\])(?:[*+]|\{\d+\,(?:\d+)?\})?)+$/i.test(arg)) {
-			return this.say(room, 'Regular expression /' + arg + '/i cannot be added to the blacklist. Proofread!');
+		if (/^(?:(?:\.+|[a-z0-9]|\\[a-z0-9SbB])(?![a-z0-9\.\\])(?:\*|\{\d+\,(?:\d+)?\}))+$/i.test(arg)) {
+			return this.say(room, 'Regular expression /' + arg + '/i cannot be added to the blacklist. Don\'t be Machiavellian!');
 		}
 
-		arg = '/' + arg + '/i';
-		if (!this.blacklistUser(arg, room.id)) return this.say(room, '/' + arg + ' is already present in the blacklist.');
+		var regex = '/' + arg + '/i';
+		if (!this.blacklistUser(regex, room.id)) return this.say(room, '/' + regex + ' is already present in the blacklist.');
+
+		var regexObj = new RegExp(arg, 'i');
+		var users = room.users.entries();
+		var groups = Config.groups;
+		var selfid = Users.self.id;
+		var selfidx = groups[room.users.get(selfid)];
+		for (let u of users) {
+			let userid = u[0];
+			if (userid !== selfid && regexObj.test(userid) && groups[u[1]] < selfidx) {
+				this.say(room, '/roomban ' + userid + ', Blacklisted user');
+			}
+		}
 
 		this.writeSettings();
-		this.say(room, '/modnote Regular expression ' + arg + ' was added to the blacklist by user ' + user.name + '.');
-		this.say(room, 'Regular expression ' + arg + ' was added to the blacklist.');
+		this.say(room, '/modnote Regular expression ' + regex + ' was added to the blacklist by user ' + user.name + '.');
+		this.say(room, 'Regular expression ' + regex + ' was added to the blacklist.');
 	},
 	unrab: 'unregexautoban',
 	unregexautoban: function (arg, user, room) {
