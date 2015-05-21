@@ -136,7 +136,7 @@ var dequeueTimeout = null;
 var lastSentAt = 0;
 
 global.send = function (data) {
-	if (!Connection.connected) return false;
+	if (!data || !Connection.connected) return false;
 	
 	var now = Date.now();
 	if (now < lastSentAt + MESSAGE_THROTTLE - 5) {
