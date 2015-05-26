@@ -225,7 +225,7 @@ exports.commands = {
 			return this.say(room, msg);
 		}
 
-		let setting = toId(opts[1]);
+		let setting = opts[1].trim();
 		if (!(setting in CONFIGURABLE_COMMAND_LEVELS)) return this.say(room, 'Unknown option: "' + setting + '". Valid settings are: off/disable/false, +, %, @, #, &, ~, on/enable/true.');
 		if (!this.settings[cmd]) this.settings[cmd] = {};
 		this.settings[cmd][roomid] = CONFIGURABLE_COMMAND_LEVELS[setting];
