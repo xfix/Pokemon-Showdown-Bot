@@ -58,7 +58,7 @@ exports.commands = {
 	credits: 'about',
 	about: function (arg, user, room) {
 		var text = (room === user || user.hasRank(room.id, '#')) ? '' : '/pm ' + user.id + ', ';
-		text += '**Pokémon Showdown Bot** user: Quinella, TalkTakesTime, and Morfent';
+		text += '**Pokémon Showdown Bot** by: Quinella, TalkTakesTime, and Morfent';
 		this.say(room, text);
 	},
 	git: function (arg, user, room) {
@@ -436,7 +436,7 @@ exports.commands = {
 		}
 
 		this.writeSettings();
-		this.say(room, 'Phrase \"' + arg + '\" is no longer banned.');
+		this.say(room, 'Phrase "' + arg + '" is no longer banned.');
 	},
 	viewbannedphrases: 'viewbannedwords',
 	vbw: 'viewbannedwords',
