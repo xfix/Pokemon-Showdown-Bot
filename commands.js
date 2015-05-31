@@ -753,7 +753,7 @@ exports.commands = {
 			self.getDocMeta('0Avz7HpTxAsjIdFFSQ3BhVGpCbHVVdTJ2VVlDVVV6TWc', function (err, meta) {
 				if (err) return self.say(room, text + 'An error occured while processing your command.');
 
-				if (room !== user && !text) text += '/pm ' + user.id + ', ';
+				if (!text && room !== user) text += '/pm ' + user.id + ', ';
 				if (wifiData.docRevs[1] === meta.version) {
 					let cloners = wifiData.cloners;
 					let found = [];
@@ -770,7 +770,7 @@ exports.commands = {
 				wifiData.docRevs[1] = meta.version;
 				self.getDocCsv(meta, function (data) {
 					csv(data, function (err, data) {
-						if (err) return this.say(room, text + 'An error occured while processing your command.');
+						if (err) return self.say(room, text + 'An error occured while processing your command.');
 
 						let cloners = wifiData.cloners = {};
 						let found = [];
@@ -788,7 +788,7 @@ exports.commands = {
 						}
 
 						if (!found.length) return self.say(room, text + 'No cloners were found online.');
-						self.uploadToHastebin("The following cloners are online :\n\n" + found.join('\n'), function (link) {
+						self.uploadToHastebin('The following cloners are online :\n\n' + found.join('\n'), function (link) {
 							self.say(room, text + 'The following cloners are online: ' + link);
 						});
 					});
@@ -859,6 +859,57 @@ exports.commands = {
 		this.say(room, text);
 	},
 
+	/**
+	 * The Studio commands
+	 *
+	 * The following command is the command for the weekly Saturday-night
+	 * rap battle in The Studio.
+	 */
+
+	mic: function (arg, user, room) {
+		if (!arg || room.id !== 'thestudio' || !user.hasRank(room.id, '%')) {
+			return false;
+		}
+
+		arg = arg.split(',');
+		if (arg.length !== 2) return this.say(room, 'Not enough rappers were provided. Syntax: .mic [rapper1], [rapper2]');
+
+		var rapper1 = Users.get(toId(arg[0]));
+		if (!rapper1) return this.say(room, 'User ' + arg[0].trim() + ' does not exist.');
+		var rapper2 = Users.get(toId(arg[1]));
+		if (!rapper2) return this.say(room, 'User ' + arg[1].trim() + ' does not exist.');
+
+		var date = new Date();
+		date = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours() - 4, date.getUTCMinutes(), date.getUTCSeconds());
+		if (date.getDay() !== 6) return this.say(room, 'Rap battles take place weekly on Saturday night, at 9pm EST (GMT-4).');
+
+		var hours = date.getHours();
+		if (hours !== 21) {
+			if (hours > 22 && date.getMinutes() > 30) {
+				return this.say(room, 'Rap battles have already taken place.');
+			}
+			return this.say(room, 'Rap battles will not take place until 9pm EST (GMT-4).');
+		}
+
+		rapper1 = rapper1.id;
+		rapper2 = rapper2.id;
+		var willVoiceR1 = (room.users.get(rapper1) === ' ');
+		var willVoiceR2 = (room.users.get(rapper2) === ' ');
+		var doesNotModFlooding = this.settings.modding && this.settings.modding[room.id]
+				&& this.settings.modding[room.id] === false;
+
+		if (willVoiceR1) this.say(room, '/roomvoice ' + rapper1);
+		if (willVoiceR2) this.say(room, '/roomvoice ' + rapper2);
+		this.say(room, '/modchat +');
+
+		setTimeout(function () {
+			if (willVoiceR1) this.say(room, '/roomdeauth ' + rapper1);
+			setTimeout(function () {
+				if (willVoiceR2) this.say(room, '/roomdeauth ' + rapper2);
+				this.say(room, '/modchat false');
+			}.bind(this), 3 * 60 * 1000);
+		}.bind(this), 3 * 60 * 1000);
+	},
 
 	/**
 	 * Jeopardy commands
