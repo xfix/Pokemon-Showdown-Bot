@@ -8,18 +8,6 @@
 
 var Users = Object.create(null);
 var users = Users.users = Object.create(null);
-var getUser = Users.get = function (username) {
-	var userid = toId(username);
-	return users[userid];
-};	
-var addUser = Users.add = function (username, room) {
-	var user = getUser(username);
-	if (!user) {
-		user = new User(username, room);
-		users[user.id] = user;
-	}
-	return user;
-};
 
 class User {
 	constructor (username, roomid) {
@@ -78,5 +66,21 @@ class User {
 	}
 }
 
-Users.self = addUser(' ' + Config.nick);
+var getUser = Users.get = function (username) {
+	var userid = toId(username);
+	return users[userid];
+};
+
+var addUser = Users.add = function (username, room) {
+	var user = getUser(username);
+	if (!user) {
+		user = new User(username, room);
+		users[user.id] = user;
+	}
+	return user;
+};
+
+var botId = ' ' + toId(Config.nick);
+Users.self = getUser(botId) || addUser(botId);
+
 module.exports = Users;
