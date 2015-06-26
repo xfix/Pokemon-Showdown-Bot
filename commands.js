@@ -574,7 +574,7 @@ exports.commands = {
 				break;
 			case 13:
 				text += "It is certain.";
-				break;
+				break; 
 			case 14:
 				text += "Cannot predict now.";
 				break;
@@ -685,7 +685,7 @@ exports.commands = {
 			if (!Config.googleapikey) return this.say(room, text + 'A Google API key has not been provided and is required for this command to work.');
 			if (arg.length !== 2) return this.say(room, text + 'Usage: .wifi checkfc, [fc]');
 
-			let wifiRoom = room.id === 'wifi' ? room : Rooms.get('wifi');
+			var wifiRoom = room.id === 'wifi' ? room : Rooms.get('wifi');
 			if (!wifiRoom) return false;
 			if (!wifiRoom.data) wifiRoom.data = {
 				docRevs: ['', ''],
@@ -693,8 +693,8 @@ exports.commands = {
 				cloners: {}
 			};
 
-			let wifiData = wifiRoom.data;
-			let self = this;
+			var wifiData = wifiRoom.data;
+			var self = this;
 			this.getDocMeta('0AvygZBLXTtZZdFFfZ3hhVUplZm5MSGljTTJLQmJScEE', function (err, meta) {
 				if (err) return self.say(room, text + 'An error occured while processing your command.');
 
@@ -740,7 +740,7 @@ exports.commands = {
 		case 'onlinecloners':
 			if (!Config.googleapikey) return this.say(room, text + 'A Google API key has not been provided and is required for this command to work.');
 
-			let wifiRoom = room.id === 'wifi' ? room : Rooms.get('wifi');
+			var wifiRoom = room.id === 'wifi' ? room : Rooms.get('wifi');
 			if (!wifiRoom) return false;
 			if (!wifiRoom.data) wifiRoom.data = {
 				docRevs: ['', ''],
@@ -748,8 +748,8 @@ exports.commands = {
 				cloners: {}
 			};
 
-			let wifiData = wifiRoom.data;
-			let self = this;
+			var wifiData = wifiRoom.data;
+			var self = this;
 			self.getDocMeta('0Avz7HpTxAsjIdFFSQ3BhVGpCbHVVdTJ2VVlDVVV6TWc', function (err, meta) {
 				if (err) return self.say(room, text + 'An error occured while processing your command.');
 

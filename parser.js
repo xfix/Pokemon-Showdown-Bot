@@ -75,17 +75,17 @@ exports.parse = {
 		switch (spl[1]) {
 			case 'challstr':
 				info('received challstr, logging in...');
-				let id = spl[2];
-				let str = spl[3];
+				var id = spl[2];
+				var str = spl[3];
 
-				let requestOptions = {
+				var requestOptions = {
 					hostname: this.actionUrl.hostname,
 					port: this.actionUrl.port,
 					path: this.actionUrl.pathname,
 					agent: false
 				};
 
-				let data;
+				var data;
 				if (!Config.pass) {
 					requestOptions.method = 'GET';
 					requestOptions.path += '?act=getassertion&userid=' + toId(Config.nick) + '&challengekeyid=' + id + '&challenge=' + str;
@@ -98,9 +98,9 @@ exports.parse = {
 					};
 				}
 
-				let req = https.request(requestOptions, function (res) {
+				var req = https.request(requestOptions, function (res) {
 					res.setEncoding('utf8');
-					let data = '';
+					var data = '';
 					res.on('data', function (chunk) {
 						data += chunk;
 					});
@@ -173,8 +173,8 @@ exports.parse = {
 				setInterval(this.cleanChatData.bind(this), 30 * 60 * 1000);
 				break;
 			case 'c':
-				let username = spl[2];
-				let user = Users.get(username);
+				var username = spl[2];
+				var user = Users.get(username);
 				if (!user) return false; // various "chat" responses contain other data
 				if (user === Users.self) return false;
 				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
@@ -184,8 +184,8 @@ exports.parse = {
 				this.chatMessage(spl, user, room);
 				break;
 			case 'c:':
-				let username = spl[3];
-				let user = Users.get(username);
+				var username = spl[3];
+				var user = Users.get(username);
 				if (!user) return false; // various "chat" responses contain other data
 				if (user === Users.self) return false;
 				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
@@ -195,9 +195,9 @@ exports.parse = {
 				this.chatMessage(spl, user, room);
 				break;
 			case 'pm':
-				let username = spl[2];
-				let user = Users.get(username);
-				let group = username.charAt(0);
+				var username = spl[2];
+				var user = Users.get(username);
+				var group = username.charAt(0);
 				if (!user) user = Users.add(username);
 				if (user === Users.self) return false;
 
@@ -209,22 +209,22 @@ exports.parse = {
 				this.chatMessage(spl, user, user);
 				break;
 			case 'N':
-				let username = spl[2];
-				let oldid = spl[3];
-				let user = room.onRename(username, oldid);
+				var username = spl[2];
+				var oldid = spl[3];
+				var user = room.onRename(username, oldid);
 				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
 				this.updateSeen(oldid, spl[1], user.id);
 				break;
 			case 'J': case 'j':
-				let username = spl[2];
-				let user = room.onJoin(username, username.charAt(0));
+				var username = spl[2];
+				var user = room.onJoin(username, username.charAt(0));
 				if (user === Users.self) return false;
 				if (this.isBlacklisted(user.id, room.id)) this.say(room, '/roomban ' + user.id + ', Blacklisted user');
 				this.updateSeen(user.id, spl[1], room.id);
 				break;
 			case 'l': case 'L':
-				let username = spl[2];
-				let user = room.onLeave(username);
+				var username = spl[2];
+				var user = room.onLeave(username);
 				if (user) {
 					if (user === Users.self) return false;
 					this.updateSeen(user.id, spl[1], room.id);
