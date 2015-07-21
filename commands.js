@@ -654,33 +654,31 @@ exports.commands = {
 
 		switch (msgType) {
 		case 'intro': 
-			return this.say(room, text + 'Here is an introduction to Wi-Fi: http://tinyurl.com/welcome2wifi');
+			return this.say(room, text + 'Here is an introduction to Wi-Fi: https://docs.google.com/document/d/1Lk29aFRX12qK0fwbTwria6JvBCjZwYosENqP2_3h-ac/edit');
 		case 'rules': 
 			return this.say(room, text + 'The rules for the Wi-Fi room can be found here: http://pstradingroom.weebly.com/rules.html');
 		case 'faq':
 		case 'faqs':
 			return this.say(room, text + 'Wi-Fi room FAQs: http://pstradingroom.weebly.com/faqs.html');
 		case 'scammers':
-			return this.say(room, text + 'List of known scammers: http://tinyurl.com/psscammers');
+			return this.say(room, text + 'List of known scammers: https://docs.google.com/spreadsheet/ccc?key=0AvygZBLXTtZZdFFfZ3hhVUplZm5MSGljTTJLQmJScEE#gid=0');
 		case 'cloners':
-			return this.say(room, text + 'List of approved cloners: http://goo.gl/WO8Mf4');
+			return this.say(room, text + 'List of approved cloners: https://docs.google.com/spreadsheets/d/1BcUPm3pp9W2GpLEBgIjgoi-n6wgrEqwDgIZAt82hnGI/edit#gid=0');
 		case 'tips':
 			return this.say(room, text + 'Scamming prevention tips: http://pstradingroom.weebly.com/scamming-prevention-tips.html');
 		case 'breeders':
-			return this.say(room, text + 'List of breeders: http://tinyurl.com/WiFIBReedingBrigade');
+			return this.say(room, text + 'List of breeders: https://docs.google.com/spreadsheets/d/1LWA9FaCcstVl2oxl2alT93S8nmB5UKLyQR9Mka58ntY/edit#gid=0');
 		case 'signup':
-			return this.say(room, text + 'Breeders Sign Up: http://tinyurl.com/GetBreeding');
+			return this.say(room, text + 'Breeders Sign Up: https://docs.google.com/forms/d/1AfhX9SidTS2LRzBUf6cVVkd9r01FJJ8-tbrS2PTW03Q/viewform');
 		case 'bans':
 		case 'banappeals':
-			return this.say(room, text + 'Ban appeals: http://tinyurl.com/WifiBanAppeals');
+			return this.say(room, text + 'Ban appeals: http://pswifi.freeforums.org/ban-appeals-f4.html');
 		case 'lists':
-			return this.say(room, text + 'Major and minor list compilation: http://tinyurl.com/WifiSheets');
+			return this.say(room, text + 'Major and minor list compilation: https://docs.google.com/spreadsheets/d/1Rv9YOwwxXdPMSQPOpG_1Kas9Er_yhIiVlOkpzaODodk/edit#gid=0');
 		case 'trainers':
-			return this.say(room, text + 'List of EV trainers: http://tinyurl.com/WifiEVtrainingCrew');
-		case 'youtube':
-			return this.say(room, text + 'Wi-Fi room\'s official YouTube channel: http://tinyurl.com/wifiyoutube');
+			return this.say(room, text + 'List of EV trainers: https://docs.google.com/spreadsheets/d/1LWA9FaCcstVl2oxl2alT93S8nmB5UKLyQR9Mka58ntY/edit#gid=2104849124');
 		case 'league':
-			return this.say(room, text + 'Wi-Fi Room Pokemon League: http://tinyurl.com/wifiroomleague');
+			return this.say(room, text + 'Wi-Fi Room Pokemon League: https://docs.google.com/spreadsheets/d/1vbwcTvX0xQiSKafTZkxwq7AllUZis0egFFdyTcbDioE/edit#gid=0');
 		case 'checkfc':
 			if (!Config.googleapikey) return this.say(room, text + 'A Google API key has not been provided and is required for this command to work.');
 			if (arg.length !== 2) return this.say(room, text + 'Usage: .wifi checkfc, [fc]');
