@@ -507,8 +507,9 @@ exports.commands = {
 	},
 	usage: 'usagestats',
 	usagestats: function (arg, user, room) {
+		if (arg) return false;
 		var text = (room === user || user.canUse('usagestats', room.id)) ? '' : '/pm ' + user.id + ', ';
-		text += 'http://www.smogon.com/stats/2015-05/';
+		text += 'http://www.smogon.com/stats/2015-07/';
 		this.say(room, text);
 	},
 	seen: function (arg, user, room) { // this command is still a bit buggy
