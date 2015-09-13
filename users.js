@@ -82,5 +82,13 @@ var addUser = Users.add = function (username, room) {
 
 var botId = ' ' + toId(Config.nick);
 Users.self = getUser(botId) || addUser(botId);
+// Sometimes, the bot forgets it's a staff member in a room. As rooms
+// pretty much assign @ for Usain Bot, assume the bot has @ in it.
+//
+// TODO: Determine why this happens.
+Users.self.hasRank = function (roomid, tarGroup) {
+	var group = this.rooms.get(roomid) || roomid || '@';
+	return Config.groups[group] >= Config.groups[tarGroup];
+}
 
 module.exports = Users;
