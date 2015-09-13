@@ -243,8 +243,6 @@ exports.parse = {
 			case 'popup':
 				var parts = spl.slice(2).join('|').split('||||');
 				if (!parts[0].endsWith(' user auth:')) return;
-				Config.rooms = [];
-				Config.privaterooms = [];
 				for (var i = 1; i < parts.length; i++) {
 					var part = parts[i];
 					var roomAuthMessage = "Room auth: ";
