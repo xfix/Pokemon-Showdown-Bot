@@ -206,7 +206,10 @@ exports.parse = {
 						!(toId(spl.substr(8)) === 'lobby' && Config.serverid === 'showdown')) {
 					return send('|/join ' + spl.substr(8));
 				}
-				this.chatMessage(spl, user, user);
+				var isCommand = this.chatMessage(spl, user, user);
+				if (!isCommand) {
+					this.unrecognizedCommand(spl, user);
+				}
 				break;
 			case 'N':
 				var username = spl[2];
@@ -260,6 +263,7 @@ exports.parse = {
 				error("invalid command type for " + cmd + ": " + (typeof Commands[cmd]));
 			}
 		}
+		return true;
 	},
 	say: function (target, text) {
 		var targetId = target.id;
@@ -582,5 +586,19 @@ exports.parse = {
 		}).on('error', function (e) {
 			callback('Error connecting to Google Docs: ' + e.message);
 		});
+	},
+	unrecognizedCommand: function (message, user) {
+		if (user === Users.self) return;
+		var failureMessage;
+		var scavengers = Rooms.get('scavengers');
+		if (scavengers && scavengers.users.has(user.id) && /\b(?:starthunt|[hp]astebin)\b/i.test(message)) {
+			failureMessage = "Thank you for submitting a hunt, but I'm just a bot. Please PM some other staff member to start your hunt.";
+		} else {
+			failureMessage = "Hi, " + user.name + "! I'm just a bot, for assistance, please ask another staff member.";
+			if (Config.botguide) {
+				failureMessage += " Command list: " + Config.botguide;
+			}
+		}
+		this.say(user, failureMessage);
 	}
 };
