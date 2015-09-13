@@ -92,12 +92,7 @@ global.stripCommands = function (text) {
 };
 
 // Config and config.js watching...
-try {
-	global.Config = require('./config.js');
-} catch (e) {
-	error('config.js doesn\'t exist; are you sure you copied config-example.js to config.js?');
-	process.exit(-1);
-}
+global.Config = require('./config.js');
 
 var checkCommandCharacter = function () {
 	if (!/[^a-z0-9 ]/i.test(Config.commandcharacter)) {
