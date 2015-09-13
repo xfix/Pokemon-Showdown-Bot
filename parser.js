@@ -161,8 +161,13 @@ exports.parse = {
 				ok('logged in as ' + spl[2]);
 				send('|/blockchallenges');
 
-				// Now join the rooms
-				Rooms.join();
+				if (Config.rooms || Config.privaterooms) {
+					Rooms.join();
+				}
+				else {
+					// Receive list of rooms the bot is auth in.
+					send('|/userauth');
+				}
 
 				if (this.settings.blacklist) {
 					let blacklist = this.settings.blacklist;
@@ -234,6 +239,23 @@ exports.parse = {
 				} else {
 					this.updateSeen(toId(username), spl[1], room.id);
 				}
+				break;
+			case 'popup':
+				var parts = spl.slice(2).join('|').split('||||');
+				if (!parts[0].endsWith(' user auth:')) return;
+				Config.rooms = [];
+				Config.privaterooms = [];
+				for (var i = 1; i < parts.length; i++) {
+					var part = parts[i];
+					var roomAuthMessage = "Room auth: ";
+					var privateRoomAuthMessage = "Private room auth: ";
+					if (part.startsWith(roomAuthMessage)) {
+						Config.rooms = part.slice(roomAuthMessage.length).split(', ');
+					} else if (part.startsWith(privateRoomAuthMessage)) {
+						Config.privaterooms = part.slice(privateRoomAuthMessage.length).split(', ');
+					}
+				}
+				Rooms.join();
 				break;
 		}
 	},
