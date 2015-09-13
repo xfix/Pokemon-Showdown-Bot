@@ -411,7 +411,6 @@ exports.parse = {
 					cmd = Config.punishvals[pointVal] || cmd;
 					roomData.points = pointVal; // next action will be one level higher than this one (in most cases)
 				}
-				if (Config.privaterooms.indexOf(roomid) > -1 && cmd === 'warn') cmd = 'mute'; // can't warn in private rooms
 				// if the bot has % and not @, it will default to hourmuting as its highest level of punishment instead of roombanning
 				if (roomData.points >= 4 && !Users.self.hasRank(roomid, '@')) cmd = 'hourmute';
 				if (userData.zeroTol > 4) { // if zero tolerance users break a rule they get an instant roomban or hourmute
