@@ -608,7 +608,7 @@ exports.parse = {
 		});
 	},
 	unrecognizedCommand: function (message, user) {
-		if (user === Users.self) return;
+		if (user.id === Users.self.id) return;
 		var failureMessage;
 		var scavengers = Rooms.get('scavengers');
 		if (scavengers && scavengers.users.has(user.id) && /\b(?:starthunt|[hp]astebin)\b/i.test(message)) {
