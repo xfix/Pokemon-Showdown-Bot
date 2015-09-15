@@ -60,7 +60,7 @@ exports.parse = {
 			room = Rooms.get(roomid);
 			if (spl[0].substr(1, 4) === 'init') {
 				let users = spl[2].substr(7);
-				room = Rooms.add(roomid, !Config.rooms.includes(roomid));
+				room = Rooms.add(roomid, !(Config.rooms || []).includes(roomid));
 				room.onUserlist(users);
 				return ok('joined ' + room.id);
 			}
