@@ -10,7 +10,7 @@ var Rooms = Object.create(null);
 var rooms = Rooms.rooms = new Map();
 
 Rooms.join = function () {
-	var rooms = Config.rooms.concat(Config.privaterooms);
+	var rooms = (Config.rooms || []).concat(Config.privaterooms || []);
 	for (let i = 0; i < rooms.length; i++) {
 		let room = toId(rooms[i]);
 		if (room === 'lobby' && Config.serverid === 'showdown') continue;
