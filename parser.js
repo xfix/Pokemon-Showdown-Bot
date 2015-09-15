@@ -123,7 +123,7 @@ exports.parse = {
 						}
 
 						if (data.substr(0, 16) === '<!DOCTYPE html>') {
-							error('Connection error 522; trying agian in one minute');
+							error('Connection error 522; trying again in one minute');
 							setTimeout(function () {
 								this.message(message);
 							}.bind(this), 60 * 1000);
