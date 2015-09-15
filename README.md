@@ -1,5 +1,3 @@
-## THIS PROJECT IS ABANDONED AND NO LONGER MAINTAINED AS OF 8/8/2015. FORK AT YOUR OWN RISK.
-
 Pokemon-Showdown-Bot
 ====================
 
