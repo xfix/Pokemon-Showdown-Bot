@@ -168,6 +168,8 @@ exports.parse = {
 					// Receive list of rooms the bot is auth in.
 					send('|/userauth');
 				}
+				if (!Config.rooms) Config.rooms = [];
+				if (!Config.privaterooms) Config.privaterooms = [];
 
 				if (this.settings.blacklist) {
 					let blacklist = this.settings.blacklist;
