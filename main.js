@@ -10,36 +10,21 @@
 
 const MESSAGE_THROTTLE = 650;
 
-function runNpm(command) {
-	console.log('Running `npm ' + command + '`...');
-
-	var child_process = require('child_process');
-	var npm = child_process.spawn('npm', [command]);
-
-	npm.stdout.on('data', function (data) {
-		process.stdout.write(data);
-	});
-
-	npm.stderr.on('data', function (data) {
-		process.stderr.write(data);
-	});
-
-	npm.on('close', function (code) {
-		if (!code) {
-			child_process.fork('main.js').disconnect();
-		}
-	});
-}
-
 // First dependencies and welcome message
-try {
-	require('babel/register')({loose: 'all'});
-	require('sugar');
-	global.colors = require('colors');
-} catch (e) {
-	console.log('Dependencies are not installed!');
-	return runNpm('install');
-}
+require('babel/register')({
+	blacklist: [
+		'es6.arrowFunctions',
+		'es6.blockScoping',
+		'es6.classes',
+		'es6.constants',
+		'es6.forOf',
+		'es6.templateLiterals',
+		'regenerator'
+	],
+	optional: ['asyncToGenerator']
+});
+require('sugar');
+global.colors = require('colors');
 
 global.info = function (text) {
 	if (Config.debuglevel > 3) return;
