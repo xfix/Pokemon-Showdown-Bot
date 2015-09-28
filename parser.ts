@@ -15,8 +15,8 @@ import {User, self, getUser, addUser} from './users'
 import commands from './commands'
 
 import {writeFile, rename} from 'fs'
-var http = require('http')
-var https = require('https')
+import {request as httpRequest} from 'http'
+import {request as httpsRequest, get as httpsGet} from 'https'
 import {parse} from 'url'
 
 const ACTION_COOLDOWN = 3 * 1000
@@ -28,7 +28,7 @@ const MIN_CAPS_PROPORTION = 0.8
 
 // TODO: move to rooms.js
 // TODO: store settings by room, not command/blacklists
-export var settings
+export var settings: any
 try {
 	settings = require('./settings')
 } catch (e) {} // file doesn't exist [yet]
@@ -36,9 +36,9 @@ if (!settings) settings = {}
 
 var actionUrl = parse('https://play.pokemonshowdown.com/~~' + Config.serverid + '/action.php')
 // TODO: handle chatdata in users.js
-export var chatData = {}
+export var chatData: any = {}
 // TODO: handle blacklists in rooms.js
-var blacklistRegexes = {}
+var blacklistRegexes: {[roomid: string]: RegExp} = {}
 
 var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string) => boolean} = {
 	challstr(spl: string[], room?: Room, message?: string) {
@@ -48,14 +48,14 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
 
 		var requestOptions = {
 			hostname: actionUrl.hostname,
-			port: actionUrl.port,
+			port: +actionUrl.port,
 			path: actionUrl.pathname,
 			agent: false,
 			method: 'GET',
 			headers: {}
 		}
 
-		var data
+		var data: string
 		if (!Config.pass) {
 			requestOptions.path += '?act=getassertion&userid=' + toId(Config.nick) + '&challengekeyid=' + id + '&challenge=' + str
 		} else {
@@ -67,10 +67,10 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
 			}
 		}
 
-		var req = https.request(requestOptions, res => {
+		var req = httpsRequest(requestOptions, res => {
 			res.setEncoding('utf8')
 			var data = ''
-			res.on('data', chunk => {
+			res.on('data', (chunk: string) => {
 				data += chunk
 			})
 			res.on('end', () => {
@@ -108,7 +108,7 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
 			})
 		})
 
-		req.on('error', err => {
+		req.on('error', (err: Error) => {
 			error('login error: ' + err.stack)
 		})
 
@@ -256,7 +256,7 @@ export function parseData(data: string) {
 function splitMessage(message: string) {
 	if (!message) return
 
-	var room = null
+	var room: Room = null
 	if (message.indexOf('\n') < 0) {
 		parseMessage(message, room)
 		return
@@ -354,7 +354,7 @@ export function unblacklistUser(userid: string, roomid: string) {
 }
 function updateBlacklistRegex(roomid: string) {
 	var blacklist = settings.blacklist[roomid]
-	var buffer = []
+	var buffer: string[] = []
 	for (let entry in blacklist) {
 		if (entry.startsWith('/') && entry.endsWith('/i')) {
 			buffer.push(entry.slice(1, -2))
@@ -372,15 +372,15 @@ export function uploadToHastebin(toUpload: string, callback: (result: string) =>
 		path: '/documents'
 	}
 
-	var req = http.request(reqOpts, function (res) {
-		res.on('data', function (chunk) {
+	var req = httpRequest(reqOpts, function (res) {
+		res.on('data', (chunk: string) => {
 			// CloudFlare can go to hell for sending the body in a header request like this
 			if (typeof chunk === 'string' && chunk.substr(0, 15) === '<!DOCTYPE html>') return callback('Error uploading to Hastebin.')
 			var filename = JSON.parse(chunk.toString()).key
 			callback('http://hastebin.com/raw/' + filename)
 		})
 	})
-	req.on('error', function (e) {
+	req.on('error', (e: Error) => {
 		callback('Error uploading to Hastebin: ' + e.message)
 	})
 
@@ -478,7 +478,6 @@ function processChatData(userid: string, roomid: string, msg: string) {
 	}
 }
 function cleanChatData() {
-	var chatData = chatData
 	for (let user in chatData) {
 		for (let room in chatData[user]) {
 			let roomData = chatData[user][room]
@@ -488,7 +487,7 @@ function cleanChatData() {
 				delete chatData[user][room]
 				continue
 			}
-			let newTimes = []
+			let newTimes: number[] = []
 			let now = Date.now()
 			let times = roomData.times
 			for (let time of times) {
@@ -503,7 +502,7 @@ function cleanChatData() {
 	}
 }
 
-function updateSeen(user, type, detail) {
+function updateSeen(user: string, type: string, detail: string) {
 	if (type !== 'n' && Config.rooms.indexOf(detail) < 0 || Config.privaterooms.indexOf(detail) > -1) return
 	var now = Date.now()
 	if (!chatData[user]) chatData[user] = {
@@ -540,7 +539,7 @@ export function getTimeAgo(time: number) {
 	time = ~~((Date.now() - time) / 1000)
 
 	var seconds = time % 60
-	var times = []
+	var times: string[] = []
 	if (seconds) times.push(seconds + (seconds === 1 ? ' second': ' seconds'))
 	if (time >= 60) {
 		time = ~~((time - seconds) / 60)
@@ -589,40 +588,9 @@ export function writeSettings() {
 		})
 	})
 }
-function getDocMeta(id: string, callback: (result?: string, data?: Object|string) => void) {
-	https.get('https://www.googleapis.com/drive/v2/files/' + id + '?key=' + Config.googleapikey, function (res) {
-		var data = ''
-		res.on('data', function (part) {
-			data += part
-		})
-		res.on('end', function (end) {
-			var json = JSON.parse(data)
-			if (json) {
-				callback(null, json)
-			} else {
-				callback('Invalid response', data)
-			}
-		})
-	}).on('error', function (e) {
-		callback('Error connecting to Google Docs: ' + e.message)
-	})
-}
-function getDocCsv(meta, callback: (result: string) => void) {
-	https.get('https://docs.google.com/spreadsheet/pub?key=' + meta.id + '&output=csv', function (res) {
-		var data = ''
-		res.on('data', function (part) {
-			data += part
-		})
-		res.on('end', function (end) {
-			callback(data)
-		})
-	}).on('error', function (e) {
-		callback('Error connecting to Google Docs: ' + e.message)
-	})
-}
-function unrecognizedCommand(message, user) {
+function unrecognizedCommand(message: string, user: User) {
 	if (user.id === self.id) return
-	var failureMessage
+	var failureMessage: string
 	var scavengers = getRoom('scavengers')
 	if (scavengers && scavengers.users.has(user.id) && /\b(?:starthunt|[hp]astebin)\b/i.test(message)) {
 		failureMessage = "Thank you for submitting a hunt, but I'm just a bot. Please PM some other staff member to start your hunt."
@@ -632,5 +600,5 @@ function unrecognizedCommand(message, user) {
 			failureMessage += " Command list: " + Config.botguide
 		}
 	}
-	say(user, failureMessage)
+	user.say(failureMessage)
 }

@@ -137,7 +137,7 @@ var commands: {
 		var text = ((room === user || user.isExcepted()) ? '' : '/pm ' + user.id + ', ') + '**Uptime:** '
 		var divisors = [52, 7, 24, 60, 60]
 		var units = ['week', 'day', 'hour', 'minute', 'second']
-		var buffer = []
+		var buffer: string[] = []
 		var uptime = ~~(process.uptime())
 		do {
 			let divisor = divisors.pop()
@@ -182,7 +182,7 @@ var commands: {
 		var cmd = toId(opts[0])
 		var roomid = room.id
 		if (cmd === 'm' || cmd === 'mod' || cmd === 'modding') {
-			let modOpt
+			let modOpt: string
 			if (!opts[1] || !CONFIGURABLE_MODERATION_OPTIONS[(modOpt = toId(opts[1]))]) {
 				return room.say('Incorrect command: correct syntax is ' + Config.commandcharacter + 'set mod, [' +
 					Object.keys(CONFIGURABLE_MODERATION_OPTIONS).join('/') + '](, [on/off])')
@@ -229,7 +229,7 @@ var commands: {
 			let msg = '' + Config.commandcharacter + '' + cmd + ' is '
 			if (!settings[cmd] || (!(roomid in settings[cmd]))) {
 				msg += 'available for users of rank ' + ((cmd === 'autoban' || cmd === 'banword') ? '#' : Config.defaultrank) + ' and above.'
-			} else if (settings[cmd][roomid] in CONFIGURABLE_COMMAND_LEVELS) {
+			} else if (<string> settings[cmd][roomid] in CONFIGURABLE_COMMAND_LEVELS) {
 				msg += 'available for users of rank ' + settings[cmd][roomid] + ' and above.'
 			} else {
 				msg += settings[cmd][roomid] ? 'available for all users in this room.' : 'not available for use in this room.'
@@ -257,9 +257,9 @@ var commands: {
 		if (!toId(arg)) return room.say('You must specify at least one user to blacklist.')
 
 		const args = arg.split(',')
-		var added = []
-		var illegalNick = []
-		var alreadyAdded = []
+		var added: string[] = []
+		var illegalNick: string[] = []
+		var alreadyAdded: string[] = []
 		var roomid = room.id
 		for (let u of args) {
 			let tarUser = toId(u)
@@ -294,8 +294,8 @@ var commands: {
 		if (!toId(arg)) return room.say('You must specify at least one user to unblacklist.')
 
 		const args = arg.split(',')
-		var removed = []
-		var notRemoved = []
+		var removed: string[] = []
+		var notRemoved: string[] = []
 		var roomid = room.id
 		for (let u of args) {
 			let tarUser = toId(u)
@@ -393,7 +393,7 @@ var commands: {
 		if (!nick || nick.length > 18) {
 			text += 'Invalid username: "' + nick + '".'
 		} else {
-			text += 'User "' + nick + '" is currently ' + (blacklist[nick] || 'not ') + 'blacklisted in ' + roomid + '.'
+			text += `User ${nick} is currently ${blacklist[nick] ? '' : 'not '} blacklisted in ${roomid}.`
 		}
 		room.say(text)
 	},
@@ -426,7 +426,7 @@ var commands: {
 	},
 	unbanphrase: 'unbanword',
 	unbanword(arg, user, room) {
-		var tarRoom
+		var tarRoom: string
 		if (room === user) {
 			if (!user.isExcepted()) return false
 			tarRoom = 'global'
@@ -507,7 +507,7 @@ var commands: {
 			method: 'GET'
 		}
 		var req = request(reqOpt, res => {
-			res.on('data', chunk => {
+			res.on('data', (chunk: string) => {
 				try {
 					let data = JSON.parse(chunk)
 					room.say(data.value.joke.replace(/&quot;/g, "\""))
@@ -648,8 +648,6 @@ var commands: {
 		rapper2 = rapper2.id
 		var willVoiceR1 = ((<Room> room).users.get(rapper1) === ' ')
 		var willVoiceR2 = ((<Room> room).users.get(rapper2) === ' ')
-		var doesNotModFlooding = settings.modding && settings.modding[room.id]
-				&& settings.modding[room.id] === false
 
 		if (willVoiceR1) room.say('/roomvoice ' + rapper1)
 		if (willVoiceR2) room.say('/roomvoice ' + rapper2)

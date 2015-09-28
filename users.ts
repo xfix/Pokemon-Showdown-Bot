@@ -78,7 +78,7 @@ export class User {
 	}
 }
 
-export function getUser(username) {
+export function getUser(username: string) {
 	var userid = toId(username)
 	return users[userid]
 }

@@ -43,19 +43,19 @@ if (Config.watchconfig) {
 // And now comes the real stuff...
 info('starting server')
 
-import {client as WebSocketClient} from 'websocket'
+import {client as WebSocketClient, connection} from 'websocket'
 import commands from './commands'
 import {users} from './users'
 import {rooms} from './rooms'
 import {parseData} from './parser'
-export var Connection
+export var Connection: connection
 
-let queue = []
-let dequeueTimeout = null
+let queue: string[] = []
+let dequeueTimeout: NodeJS.Timer = null
 let lastSentAt = 0
 
-export function send(data) {
-	if (!data || !Connection.connected) return false
+export function send(data: string) {
+	if (!data || Connection.connected) return false
 	
 	var now = Date.now()
 	if (now < lastSentAt + MESSAGE_THROTTLE - 5) {
@@ -66,8 +66,7 @@ export function send(data) {
 		return false
 	}
 
-	if (!Array.isArray(data)) data = [data.toString()]
-	data = JSON.stringify(data)
+	data = JSON.stringify([data])
 	dsend(data)
 	Connection.send(data)
 

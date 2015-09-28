@@ -26,14 +26,14 @@ export class Room {
 	isPrivate: boolean
 	users = new Map<string, string>()
 
-	constructor(roomid, type) {
+	constructor(roomid: string, type: boolean) {
 		this.id = roomid
 		this.isPrivate = type
 	}
 
-	onUserlist(users) {
-		if (users === '0') return false; // no users in room
-		users = users.split(',')
+	onUserlist(userList: string) {
+		if (userList === '0') return false; // no users in room
+		const users = userList.split(',')
 		for (let i = 1; i < users.length; i++) {
 			let username = users[i]
 			let group = username.charAt(0)
@@ -44,7 +44,7 @@ export class Room {
 		}
 	}
 
-	onJoin(username, group) {
+	onJoin(username: string, group: string) {
 		var user = getUser(username)
 		if (!user) user = addUser(username)
 		this.users.set(user.id, group)
@@ -52,7 +52,7 @@ export class Room {
 		return user
 	}
 
-	onRename(username, oldid) {
+	onRename(username: string, oldid: string) {
 		var user = getUser(oldid)
 		var group = username.charAt(0)
 		this.users.delete(oldid)
@@ -66,7 +66,7 @@ export class Room {
 		return user
 	}
 
-	onLeave(username) {
+	onLeave(username: string) {
 		var user = getUser(username)
 		this.users.delete(user.id)
 		user.rooms.delete(this.id)
@@ -93,7 +93,7 @@ export function getRoom(name: string) {
 	return rooms.get(name)
 }
 
-export function addRoom(roomid, type) {
+export function addRoom(roomid: string, type: boolean) {
 	var room = getRoom(roomid)
 	if (room) return room
 	room = new Room(roomid, type)
