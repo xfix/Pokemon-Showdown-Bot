@@ -2,6 +2,12 @@
 /node_modules/*
 npm-debug.log
 config.js
+commands.js
+main.js
+parser.js
+rooms.js
+users.js
+utils.js
 settings.json
 
 .hg
