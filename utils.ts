@@ -58,7 +58,6 @@ export function getServerInformation(host: string, callback: (server: string, po
 	get('https://play.pokemonshowdown.com/crossdomain.php?' + stringify({host}), result => {
 		result.setEncoding('utf-8')
 		result.on('data', chunk => {
-			console.log(chunk)
 			const configuration = /var config = (.*);$/m.exec(chunk)
 			if (!configuration) {
 				error(`Cannot get configuration for server ${host}.`)
