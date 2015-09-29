@@ -55,7 +55,7 @@ let dequeueTimeout: NodeJS.Timer = null
 let lastSentAt = 0
 
 export function send(data: string) {
-	if (!data || Connection.connected) return false
+	if (!data || !Connection.connected) return false
 	
 	var now = Date.now()
 	if (now < lastSentAt + MESSAGE_THROTTLE - 5) {
