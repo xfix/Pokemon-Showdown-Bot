@@ -3,6 +3,8 @@
 
 import {cyan, blue, grey, red, green} from 'colors/safe'
 import {Config} from './main'
+import {get} from 'https'
+import {stringify} from 'querystring'
 
 export function isEmpty(object: Object) {
 	for (const key in object) {
@@ -47,4 +49,23 @@ export function error(text: string) {
 export function ok(text: string) {
 	if (Config.debuglevel > 4) return
 	console.log(green('ok') + '    ' + text)
+}
+
+export function getServerInformation(host: string, callback: (server: string, port: number) => void) {
+	if (!/\./.test(host)) {
+		host += '.psim.us'
+	}
+	get('https://play.pokemonshowdown.com/crossdomain.php?' + stringify({host}), result => {
+		result.setEncoding('utf-8')
+		result.on('data', chunk => {
+			console.log(chunk)
+			const configuration = /var config = (.*);$/m.exec(chunk)
+			if (!configuration) {
+				error(`Cannot get configuration for server ${host}.`)
+				return
+			}
+			const parsedConfiguration = JSON.parse(configuration[1])
+			callback(parsedConfiguration.host, parsedConfiguration.port)
+		})
+	})
 }

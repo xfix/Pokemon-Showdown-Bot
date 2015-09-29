@@ -13,7 +13,7 @@
 
 const MESSAGE_THROTTLE = 650
 
-import {info, recv, dsend, error, ok} from './utils'
+import {info, recv, dsend, error, ok, getServerInformation} from './utils'
 
 // Config and config.js watching...
 export let Config = require('./config.js')
@@ -84,7 +84,7 @@ function dequeue() {
 	send(queue.shift())
 }
 
-function connect(retry: boolean) {
+function connect(address, retry: boolean) {
 	if (retry) {
 		info('retrying...')
 	}
@@ -96,7 +96,7 @@ function connect(retry: boolean) {
 		info('retrying in one minute')
 
 		setTimeout(function () {
-			connect(true)
+			connect(address, true)
 		}, 60000)
 	})
 
@@ -118,7 +118,7 @@ function connect(retry: boolean) {
 			}
 			rooms.clear()
 			setTimeout(function () {
-				connect(true)
+				connect(address, true)
 			}, 60000)
 		})
 
@@ -142,9 +142,10 @@ function connect(retry: boolean) {
 		str += chars.charAt(~~(Math.random() * l))
 	}
 
-	var conStr = 'ws://' + Config.server + ':' + Config.port + '/showdown/' + id + '/' + str + '/websocket'
-	info('connecting to ' + conStr + ' - secondary protocols: ' + (Config.secprotocols.join(', ') || 'none'))
-	ws.connect(conStr, Config.secprotocols)
+	info('connecting to ' + address + ' - secondary protocols: ' + (Config.secprotocols.join(', ') || 'none'))
+	ws.connect(address, Config.secprotocols)
 }
 
-connect(false)
+getServerInformation(Config.server, (server, port) => {
+    connect(`ws://${server}:${port}/showdown/websocket`, false)
+})

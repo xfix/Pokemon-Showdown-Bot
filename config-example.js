@@ -1,19 +1,5 @@
-// The WEBSOCKET server and port the bot should connect to.
-// Most of the time this isn't the same as the URL, check the `Request URL` of
-// the websocket.
-// If you really don't know how to do this... Run `node getserver.js URL`.
-// Fill in the URL of the client where `URL` is.
-// For example: `node getserver.js http://example-server.psim.us/`
-exports.server = 'sim.psim.us';
-exports.port = 8000;
-
-// This is the server id.
-// To know this one, you should check where the AJAX call 'goes' to when you
-// log in.
-// For example, on the Smogon server, it will say somewhere in the URL
-// ~~showdown, meaning that the server id is 'showdown'.
-// If you really don't know how to check this... run the said script above.
-exports.serverid = 'showdown';
+// The server the bot should connect to.
+exports.server = 'play.pokemonshowdown.com';
 
 // The nick and password to log in with
 // If no password is required, leave pass empty
