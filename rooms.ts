@@ -8,7 +8,7 @@
 
 import {Config, send} from './main'
 import {toId} from './utils'
-import {getUser, addUser} from './users'
+import {self, getUser, addUser} from './users'
 
 export var rooms = new Map<string, Room>()
 
@@ -70,7 +70,7 @@ export class Room {
 		var user = getUser(username)
 		this.users.delete(user.id)
 		user.rooms.delete(this.id)
-		if (user.rooms.size) return user
+		if (user.rooms.size || user.id === self.id) return user
 		user.destroy()
 		return null
 	}
