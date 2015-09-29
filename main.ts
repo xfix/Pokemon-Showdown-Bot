@@ -66,7 +66,6 @@ export function send(data: string) {
         return false
     }
 
-    data = JSON.stringify([data])
     dsend(data)
     Connection.send(data)
 
@@ -126,10 +125,6 @@ function connect(address, retry: boolean) {
             if (response.type !== 'utf8') return false
             var message = response.utf8Data
             recv(message)
-
-            // SockJS messages sent from the server begin with 'a'
-            // this filters out other SockJS response types (heartbeats in particular)
-            if (message.charAt(0) !== 'a') return false
             parseData(message)
         })
     })

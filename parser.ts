@@ -243,15 +243,7 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
 }
 
 export function parseData(data: string) {
-    if (data.charAt(0) !== 'a') return false
-    data = JSON.parse(data.substr(1))
-    if (Array.isArray(data)) {
-        for (let i = 0, len = data.length; i < len; i++) {
-            splitMessage(data[i])
-        }
-    } else {
-        splitMessage(data)
-    }
+    splitMessage(data)
 }
 function splitMessage(message: string) {
     if (!message) return
