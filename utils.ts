@@ -52,19 +52,29 @@ export function ok(text: string) {
 }
 
 export function getServerInformation(host: string, callback: (server: string, port: number) => void) {
+	function fail(e: Error) {
+		error(`Cannot get configuration for server ${host}.`)
+		if (e) throw e
+	}
 	if (!/\./.test(host)) {
 		host += '.psim.us'
 	}
-	get('https://play.pokemonshowdown.com/crossdomain.php?' + stringify({host}), result => {
+	get('https://play.pokemonshowdown.com/crossdomain.php?' + stringify({host}), function (result) {
+		let gotResponse = false
 		result.setEncoding('utf-8')
 		result.on('data', chunk => {
+			gotResponse = true
 			const configuration = /var config = (.*);$/m.exec(chunk)
 			if (!configuration) {
-				error(`Cannot get configuration for server ${host}.`)
-				return
+				fail(new Error("Got unexpected response"))
 			}
 			const parsedConfiguration = JSON.parse(configuration[1])
 			callback(parsedConfiguration.host, parsedConfiguration.port)
 		})
-	})
+		result.on('end', () => {
+			if (!gotResponse) {
+				fail(new Error("Server does not exist"))
+			}
+		})
+	}).on('error', fail)
 }
