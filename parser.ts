@@ -453,6 +453,14 @@ function processChatData(userid: string, roomid: string, msg: string) {
 				muteMessage = ', Automated response: stretching'
 			}
 		}
+		// moderation for group chat links
+		let groupChatMatch = /(?:\bplay\.pokemonshowdown\.com\/|\bpsim\.us\/|<<)groupchat-/i.test(msg);
+		if ((useDefault || !('groupchat' in modSettings)) && groupChatMatch) {
+			if (pointVal < 1) {
+				pointVal = 1
+				muteMessage = ', Automated response: groupchat links'
+			}
+		}
 
 		if (pointVal > 0 && now - roomData.lastAction >= ACTION_COOLDOWN) {
 			let cmd = 'mute'

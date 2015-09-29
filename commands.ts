@@ -43,7 +43,8 @@ const CONFIGURABLE_MODERATION_OPTIONS: {[name: string]: boolean} = {
 	flooding: true,
 	caps: true,
 	stretching: true,
-	bannedwords: true
+	bannedwords: true,
+	groupchat: true,
 }
 
 const CONFIGURABLE_COMMAND_LEVELS: {[name: string]: boolean|string} = {
