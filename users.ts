@@ -46,7 +46,7 @@ export class User {
     canUse (cmd: string, roomid: string) {
         if (this.isExcepted()) return true
         const commandSettings = settings[cmd]
-        if (!commandSettings || !commandSettings) {
+        if (!commandSettings || !commandSettings[roomid]) {
             return this.hasRank(roomid, (cmd === 'autoban' || cmd === 'blacklist') ? '#' : Config.defaultrank)
         }
 
