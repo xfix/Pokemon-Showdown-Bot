@@ -331,7 +331,7 @@ const commands: {
 
         const regexObj = new RegExp(arg, 'i')
         // Deal with TypeScript limitations by completely ignoring strict typing.
-        const users = (<any> Array).from((<any> room).users.entries())
+        const users: string[] = (<any> Array).from((<any> room).users.entries())
         const groups = Config.groups
         const selfid = self.id
         const selfidx = groups[(<Room> room).users.get(selfid)]
