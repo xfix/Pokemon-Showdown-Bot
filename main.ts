@@ -83,7 +83,7 @@ function dequeue() {
     send(queue.shift())
 }
 
-function connect(address, retry: boolean) {
+function connect(address: string, retry: boolean) {
     if (retry) {
         info('retrying...')
     }
