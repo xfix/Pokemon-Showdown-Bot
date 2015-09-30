@@ -668,7 +668,7 @@ const commands: {
         ;(<Room> room).buzzer = setTimeout(() => {
             room.say(`${user.name}, your time to answer is up!`)
             ;(<Room> room).buzzer = null
-        }, 7 * 1000);
+        }, 7 * 1000)
     },
     reset: function (arg, user, room) {
         if (!(<Room> room).buzzer || room === user || !user.hasRank(room.id, '%')) return false
