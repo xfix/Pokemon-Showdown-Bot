@@ -17,11 +17,6 @@ import {
 
 import {request} from 'http'
 
-if (Config.serverid === 'showdown') {
-    const https = require('https')
-    const csv = require('csv-parse')
-}
-
 // .set constants
 const CONFIGURABLE_COMMANDS: {[name: string]: boolean} = {
     autoban: true,
