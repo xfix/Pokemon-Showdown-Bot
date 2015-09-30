@@ -32,7 +32,7 @@ export class Room {
     }
 
     onUserlist(userList: string) {
-        if (userList === '0') return false; // no users in room
+        if (userList === '0') return false // no users in room
         const users = userList.split(',')
         for (let i = 1; i < users.length; i++) {
             const username = users[i]

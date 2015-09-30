@@ -21,7 +21,7 @@ import {parse} from 'url'
 
 const ACTION_COOLDOWN = 3 * 1000
 const FLOOD_MESSAGE_NUM = 5
-const FLOOD_PER_MSG_MIN = 500; // this is the minimum time between messages for legitimate spam. It's used to determine what "flooding" is caused by lag
+const FLOOD_PER_MSG_MIN = 500 // this is the minimum time between messages for legitimate spam. It's used to determine what "flooding" is caused by lag
 const FLOOD_MESSAGE_TIME = 6 * 1000
 const MIN_CAPS_LENGTH = 12
 const MIN_CAPS_PROPORTION = 0.8
@@ -149,7 +149,7 @@ const rawCommands: {[name: string]: (spl: string[], room?: Room, message?: strin
     c(spl: string[], room: Room) {
         const username = spl[2]
         const user = getUser(username)
-        if (!user) return false; // various "chat" responses contain other data
+        if (!user) return false // various "chat" responses contain other data
         if (user === self) return false
         if (isBlacklisted(user.id, room.id)) say(room, '/roomban ' + user.id + ', Blacklisted user')
 
@@ -161,7 +161,7 @@ const rawCommands: {[name: string]: (spl: string[], room?: Room, message?: strin
     'c:'(spl: string[], room: Room) {
         const username = spl[3]
         const user = getUser(username)
-        if (!user) return false; // various "chat" responses contain other data
+        if (!user) return false // various "chat" responses contain other data
         if (user === self) return false
         if (isBlacklisted(user.id, room.id)) say(room, '/roomban ' + user.id + ', Blacklisted user')
 
@@ -380,7 +380,7 @@ export function uploadToHastebin(toUpload: string, callback: (result: string) =>
 }
 function processChatData(userid: string, roomid: string, msg: string) {
     // NOTE: this is still in early stages
-    msg = msg.trim().replace(/[ \u0000\u200B-\u200F]+/g, ' '); // removes extra spaces and null characters so messages that should trigger stretching do so
+    msg = msg.trim().replace(/[ \u0000\u200B-\u200F]+/g, ' ') // removes extra spaces and null characters so messages that should trigger stretching do so
     updateSeen(userid, 'c', roomid)
     const now = Date.now()
     if (!chatData[userid]) chatData[userid] = {
@@ -437,7 +437,7 @@ function processChatData(userid: string, roomid: string, msg: string) {
             }
         }
         // moderation for stretching (over x consecutive characters in the message are the same)
-        const stretchMatch = /(.)\1{7,}/gi.test(msg) || /(..+)\1{4,}/gi.test(msg); // matches the same character (or group of characters) 8 (or 5) or more times in a row
+        const stretchMatch = /(.)\1{7,}/gi.test(msg) || /(..+)\1{4,}/gi.test(msg) // matches the same character (or group of characters) 8 (or 5) or more times in a row
         if ((useDefault || !('stretching' in modSettings)) && stretchMatch) {
             if (pointVal < 1) {
                 pointVal = 1
@@ -462,7 +462,7 @@ function processChatData(userid: string, roomid: string, msg: string) {
                 cmd = Config.punishvals[roomData.points] || cmd
             } else { // if the action hasn't been done before (is worth more points) it will be the one picked
                 cmd = Config.punishvals[pointVal] || cmd
-                roomData.points = pointVal; // next action will be one level higher than this one (in most cases)
+                roomData.points = pointVal // next action will be one level higher than this one (in most cases)
             }
             // if the bot has % and not @, it will default to hourmuting as its highest level of punishment instead of roombanning
             if (roomData.points >= 4 && !self.hasRank(roomid, '@')) cmd = 'hourmute'
@@ -470,7 +470,7 @@ function processChatData(userid: string, roomid: string, msg: string) {
                 muteMessage = ', Automated response: zero tolerance user'
                 cmd = self.hasRank(roomid, '@') ? 'roomban' : 'hourmute'
             }
-            if (roomData.points > 1) userData.zeroTol++; // getting muted or higher increases your zero tolerance level (warns do not)
+            if (roomData.points > 1) userData.zeroTol++ // getting muted or higher increases your zero tolerance level (warns do not)
             roomData.lastAction = now
             say(getRoom(roomid), '/' + cmd + ' ' + userid + muteMessage)
         }
