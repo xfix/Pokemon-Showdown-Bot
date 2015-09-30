@@ -25,13 +25,7 @@ const CONFIGURABLE_COMMANDS: {[name: string]: boolean} = {
     joke: true,
     usagestats: true,
     '8ball': true,
-    guia: true,
     studio: true,
-    wifi: true,
-    monotype: true,
-    survivor: true,
-    happy: true,
-    buzz: true
 }
 
 const CONFIGURABLE_MODERATION_OPTIONS: {[name: string]: boolean} = {
