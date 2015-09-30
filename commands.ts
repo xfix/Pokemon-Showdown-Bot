@@ -671,7 +671,7 @@ const commands: {
         }, 7 * 1000)
     },
     reset(arg: string, user: User, room: Room) {
-        if (!(room instanceof Room) || !room.buzzer  || !user.hasRank(room.id, '%')) return false
+        if (!(room instanceof Room) || !room.buzzer || !user.hasRank(room.id, '%')) return false
         clearTimeout(room.buzzer)
         room.buzzer = null
         room.say('The buzzer has been reset.')
