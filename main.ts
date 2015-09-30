@@ -48,16 +48,16 @@ import commands from './commands'
 import {users} from './users'
 import {rooms} from './rooms'
 import {parseData} from './parser'
-export var Connection: connection
+export let Connection: connection
 
-let queue: string[] = []
-let dequeueTimeout: NodeJS.Timer = null
+const queue: string[] = []
+let dequeueTimeout: NodeJS.Timer
 let lastSentAt = 0
 
 export function send(data: string) {
     if (!data || !Connection.connected) return false
 
-    var now = Date.now()
+    const now = Date.now()
     if (now < lastSentAt + MESSAGE_THROTTLE - 5) {
         queue.push(data)
         if (!dequeueTimeout) {
@@ -88,7 +88,7 @@ function connect(address: string, retry: boolean) {
         info('retrying...')
     }
 
-    var ws = new WebSocketClient()
+    const ws = new WebSocketClient()
 
     ws.on('connectFailed', function (err) {
         error('Could not connect to server ' + Config.server + ': ' + err.stack)
@@ -112,7 +112,7 @@ function connect(address: string, retry: boolean) {
             error('connection closed: ' + reason + ' (' + code + ')')
             info('retrying in one minute')
 
-            for (var i in users) {
+            for (const i in users) {
                 delete users[i]
             }
             rooms.clear()
@@ -123,19 +123,11 @@ function connect(address: string, retry: boolean) {
 
         con.on('message', function (response) {
             if (response.type !== 'utf8') return false
-            var message = response.utf8Data
+            const message = response.utf8Data
             recv(message)
             parseData(message)
         })
     })
-
-    // The connection itself
-    var id = ~~(Math.random() * 1000)
-    var chars = 'abcdefghijklmnopqrstuvwxyz0123456789_'
-    var str = ''
-    for (var i = 0, l = chars.length; i < 8; i++) {
-        str += chars.charAt(~~(Math.random() * l))
-    }
 
     info('connecting to ' + address + ' - secondary protocols: ' + (Config.secprotocols.join(', ') || 'none'))
     ws.connect(address, Config.secprotocols)

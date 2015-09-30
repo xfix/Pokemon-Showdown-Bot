@@ -13,17 +13,16 @@ import {Config, send} from './main'
 import {settings} from './parser'
 import {getRoom} from './rooms'
 
-export var users = Object.create(null)
+export const users = Object.create(null)
 
 export class User {
     name: string
     id: string
     rooms = new Map<string, string>()
 
-    constructor (username: string, roomid?: string) {
+    constructor (username: string) {
         this.name = username.substr(1)
         this.id = toId(this.name)
-        if (roomid) this.rooms.set(roomid, username.charAt(0))
     }
 
     isExcepted () {
@@ -40,7 +39,7 @@ export class User {
 
     hasRank (roomid: string, tarGroup: string) {
         if (this.isExcepted()) return true
-        var group = this.rooms.get(roomid) || roomid; // PM messages use the roomid parameter as the user's group
+        const group = this.rooms.get(roomid) || roomid; // PM messages use the roomid parameter as the user's group
         return Config.groups[group] >= Config.groups[tarGroup]
     }
 
@@ -50,13 +49,13 @@ export class User {
             return this.hasRank(roomid, (cmd === 'autoban' || cmd === 'blacklist') ? '#' : Config.defaultrank)
         }
 
-        var setting = settings[roomid]
+        const setting = settings[roomid]
         if (setting === true) return true
         return this.hasRank(roomid, setting)
     }
 
     rename (username: string) {
-        var oldid = this.id
+        const oldid = this.id
         delete users[oldid]
         this.id = toId(username)
         this.name = username.substr(1)
@@ -66,7 +65,7 @@ export class User {
 
     destroy () {
         this.rooms.forEach(function (group, roomid) {
-            var room = getRoom(roomid)
+            const room = getRoom(roomid)
             room.users.delete(this.id)
         })
         this.rooms.clear()
@@ -79,18 +78,19 @@ export class User {
 }
 
 export function getUser(username: string) {
-    var userid = toId(username)
+    const userid = toId(username)
     return users[userid]
 }
 
-export function addUser(username: string, room?: string) {
-    var user = getUser(username)
-    if (!user) {
-        user = new User(username, room)
-        users[user.id] = user
+export function addUser(username: string) {
+    const user = getUser(username)
+    if (user) {
+        return user
     }
-    return user
+    const newUser = new User(username)
+    users[newUser.id] = newUser
+    return newUser
 }
 
-var botId = ' ' + toId(Config.nick)
-export var self = getUser(botId) || addUser(botId)
+const botId = ' ' + toId(Config.nick)
+export const self = getUser(botId) || addUser(botId)

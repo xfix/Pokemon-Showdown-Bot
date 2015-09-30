@@ -10,12 +10,12 @@ import {Config, send} from './main'
 import {toId} from './utils'
 import {self, getUser, addUser} from './users'
 
-export var rooms = new Map<string, Room>()
+export const rooms = new Map<string, Room>()
 
 export function joinRooms() {
-    var rooms = (Config.rooms || []).concat(Config.privaterooms || [])
+    const rooms = (Config.rooms || []).concat(Config.privaterooms || [])
     for (let i = 0; i < rooms.length; i++) {
-        let room = toId(rooms[i])
+        const room = toId(rooms[i])
         if (room === 'lobby' && Config.serverid === 'showdown') continue
         send('|/join ' + room)
     }
@@ -35,26 +35,24 @@ export class Room {
         if (userList === '0') return false; // no users in room
         const users = userList.split(',')
         for (let i = 1; i < users.length; i++) {
-            let username = users[i]
-            let group = username.charAt(0)
-            let user = getUser(username)
-            if (!user) user = addUser(username, this.id)
+            const username = users[i]
+            const group = username.charAt(0)
+            const user = addUser(username)
             user.rooms.set(this.id, group)
             this.users.set(user.id, group)
         }
     }
 
     onJoin(username: string, group: string) {
-        var user = getUser(username)
-        if (!user) user = addUser(username)
+        const user = getUser(username) || addUser(username)
         this.users.set(user.id, group)
         user.rooms.set(this.id, group)
         return user
     }
 
     onRename(username: string, oldid: string) {
-        var user = getUser(oldid)
-        var group = username.charAt(0)
+        let user = getUser(oldid)
+        const group = username.charAt(0)
         this.users.delete(oldid)
         if (!user) { // already changed nick
             user = getUser(username)
@@ -67,7 +65,7 @@ export class Room {
     }
 
     onLeave(username: string) {
-        var user = getUser(username)
+        const user = getUser(username)
         this.users.delete(user.id)
         user.rooms.delete(this.id)
         if (user.rooms.size || user.id === self.id) return user
@@ -77,7 +75,7 @@ export class Room {
 
     destroy() {
         this.users.forEach(function (group, userid) {
-            var user = getUser(userid)
+            const user = getUser(userid)
             user.rooms.delete(this.id)
             if (!user.rooms.size) user.destroy()
         })
@@ -94,9 +92,7 @@ export function getRoom(name: string) {
 }
 
 export function addRoom(roomid: string, type: boolean) {
-    var room = getRoom(roomid)
-    if (room) return room
-    room = new Room(roomid, type)
+    const room = getRoom(roomid) || new Room(roomid, type)
     rooms.set(roomid, room)
     return room
 }

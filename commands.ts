@@ -18,8 +18,8 @@ import {
 import {request} from 'http'
 
 if (Config.serverid === 'showdown') {
-    var https = require('https')
-    var csv = require('csv-parse')
+    const https = require('https')
+    const csv = require('csv-parse')
 }
 
 // .set constants
@@ -56,7 +56,7 @@ const CONFIGURABLE_COMMAND_LEVELS: {[name: string]: boolean|string} = {
     'true': true
 }
 
-for (let i in Config.groups) {
+for (const i in Config.groups) {
     if (i !== ' ') CONFIGURABLE_COMMAND_LEVELS[i] = i
 }
 
@@ -67,7 +67,7 @@ function stripCommands(text: string) {
     return text
 }
 
-var commands: {
+const commands: {
     [name: string]: string
     | ((arg: string, user: User, room: Room|User) => boolean)
     | ((arg: string, user: User, room: Room|User) => void)
@@ -119,8 +119,8 @@ var commands: {
         if (arg.indexOf('[') !== 0 || arg.indexOf(']') < 0) {
             return room.say(arg)
         }
-        var tarRoomid = arg.slice(1, arg.indexOf(']'))
-        var tarRoom = getRoom(tarRoomid)
+        const tarRoomid = arg.slice(1, arg.indexOf(']'))
+        const tarRoom = getRoom(tarRoomid)
         if (!tarRoom) return room.say(self.name + ' is not in room ' + tarRoomid + '!')
         arg = arg.substr(arg.indexOf(']') + 1).trim()
         tarRoom.say(arg)
@@ -128,21 +128,21 @@ var commands: {
     js(arg, user, room) {
         if (!user.isExcepted()) return false
         try {
-            let result = eval(arg.trim())
+            const result = eval(arg.trim())
             room.say(JSON.stringify(result))
         } catch (e) {
             room.say(e.name + ": " + e.message)
         }
     },
     uptime(arg, user, room) {
-        var text = ((room === user || user.isExcepted()) ? '' : '/pm ' + user.id + ', ') + '**Uptime:** '
-        var divisors = [52, 7, 24, 60, 60]
-        var units = ['week', 'day', 'hour', 'minute', 'second']
-        var buffer: string[] = []
-        var uptime = ~~(process.uptime())
+        let text = ((room === user || user.isExcepted()) ? '' : '/pm ' + user.id + ', ') + '**Uptime:** '
+        const divisors = [52, 7, 24, 60, 60]
+        const units = ['week', 'day', 'hour', 'minute', 'second']
+        const buffer: string[] = []
+        let uptime = ~~(process.uptime())
         do {
-            let divisor = divisors.pop()
-            let unit = uptime % divisor
+            const divisor = divisors.pop()
+            const unit = uptime % divisor
             buffer.push(unit > 1 ? unit + ' ' + units.pop() + 's' : unit + ' ' + units.pop())
             uptime = ~~(uptime / divisor)
         } while (uptime)
@@ -179,9 +179,9 @@ var commands: {
     set(arg, user, room) {
         if (room === user || !user.hasRank(room.id, '#')) return false
 
-        var opts = arg.split(',')
-        var cmd = toId(opts[0])
-        var roomid = room.id
+        const opts = arg.split(',')
+        let cmd = toId(opts[0])
+        const roomid = room.id
         if (cmd === 'm' || cmd === 'mod' || cmd === 'modding') {
             let modOpt: string
             if (!opts[1] || !CONFIGURABLE_MODERATION_OPTIONS[(modOpt = toId(opts[1]))]) {
@@ -194,7 +194,7 @@ var commands: {
             if (!settings.modding) settings.modding = {}
             if (!settings.modding[roomid]) settings.modding[roomid] = {}
 
-            let setting = toId(opts[2])
+            const setting = toId(opts[2])
             if (setting === 'on') {
                 delete settings.modding[roomid][modOpt]
                 if (isEmpty(settings.modding[roomid])) delete settings.modding[roomid]
@@ -212,11 +212,12 @@ var commands: {
 
         if (!(cmd in commands)) return room.say(Config.commandcharacter + '' + opts[0] + ' is not a valid command.')
 
-        var failsafe = 0
+        let failsafe = 0
         while (true) {
-            if (typeof commands[cmd] === 'string') {
-                cmd = <string> commands[cmd]
-            } else if (typeof commands[cmd] === 'function') {
+            const newCommand = commands[cmd]
+            if (typeof newCommand === 'string') {
+                cmd = newCommand
+            } else if (typeof newCommand === 'function') {
                 if (cmd in CONFIGURABLE_COMMANDS) break
                 return room.say('The settings for ' + Config.commandcharacter + '' + opts[0] + ' cannot be changed.')
             } else {
@@ -239,7 +240,7 @@ var commands: {
             return room.say(msg)
         }
 
-        let setting = opts[1].trim()
+        const setting = opts[1].trim()
         if (!(setting in CONFIGURABLE_COMMAND_LEVELS)) return room.say('Unknown option: "' + setting + '". Valid settings are: off/disable/false, +, %, @, #, &, ~, on/enable/true.')
         if (!settings[cmd]) settings[cmd] = {}
         settings[cmd][roomid] = CONFIGURABLE_COMMAND_LEVELS[setting]
@@ -258,12 +259,12 @@ var commands: {
         if (!toId(arg)) return room.say('You must specify at least one user to blacklist.')
 
         const args = arg.split(',')
-        var added: string[] = []
-        var illegalNick: string[] = []
-        var alreadyAdded: string[] = []
-        var roomid = room.id
+        const added: string[] = []
+        const illegalNick: string[] = []
+        const alreadyAdded: string[] = []
+        const roomid = room.id
         for (let u of args) {
-            let tarUser = toId(u)
+            const tarUser = toId(u)
             if (!tarUser || tarUser.length > 18) {
                 illegalNick.push(tarUser)
             } else if (!blacklistUser(tarUser, roomid)) {
@@ -274,7 +275,7 @@ var commands: {
             }
         }
 
-        var text = ''
+        let text = ''
         if (added.length) {
             text += 'User' + (added.length > 1 ? 's "' + added.join('", "') + '" were' : ' "' + added[0] + '" was') + ' added to the blacklist.'
             room.say('/modnote ' + text + ' by ' + user.name + '.')
@@ -295,11 +296,11 @@ var commands: {
         if (!toId(arg)) return room.say('You must specify at least one user to unblacklist.')
 
         const args = arg.split(',')
-        var removed: string[] = []
-        var notRemoved: string[] = []
-        var roomid = room.id
+        const removed: string[] = []
+        const notRemoved: string[] = []
+        const roomid = room.id
         for (let u of args) {
-            let tarUser = toId(u)
+            const tarUser = toId(u)
             if (!tarUser || tarUser.length > 18) {
                 notRemoved.push(tarUser)
             } else if (!unblacklistUser(tarUser, roomid)) {
@@ -310,7 +311,7 @@ var commands: {
             }
         }
 
-        var text = ''
+        let text = ''
         if (removed.length) {
             text += ' User' + (removed.length > 1 ? 's "' + removed.join('", "') + '" were' : ' "' + removed[0] + '" was') + ' removed from the blacklist'
             room.say('/modnote ' + text + ' by user ' + user.name + '.')
@@ -335,17 +336,17 @@ var commands: {
             return room.say('Regular expression /' + arg + '/i cannot be added to the blacklist. Don\'t be Machiavellian!')
         }
 
-        var regex = '/' + arg + '/i'
+        const regex = '/' + arg + '/i'
         if (!blacklistUser(regex, room.id)) return room.say('/' + regex + ' is already present in the blacklist.')
 
-        var regexObj = new RegExp(arg, 'i')
+        const regexObj = new RegExp(arg, 'i')
         // Deal with TypeScript limitations by completely ignoring strict typing.
-        var users = (<any> Array).from((<any> room).users.entries())
-        var groups = Config.groups
-        var selfid = self.id
-        var selfidx = groups[(<Room> room).users.get(selfid)]
+        const users = (<any> Array).from((<any> room).users.entries())
+        const groups = Config.groups
+        const selfid = self.id
+        const selfidx = groups[(<Room> room).users.get(selfid)]
         for (let u of users) {
-            let userid = u[0]
+            const userid = u[0]
             if (userid !== selfid && regexObj.test(userid) && groups[u[1]] < selfidx) {
                 room.say('/roomban ' + userid + ', Blacklisted user')
             }
@@ -374,15 +375,15 @@ var commands: {
     viewblacklist(arg, user, room) {
         if (room === user || !user.canUse('autoban', room.id)) return false
 
-        var text = '/pm ' + user.id + ', '
+        let text = '/pm ' + user.id + ', '
         if (!settings.blacklist) return room.say(text + 'No users are blacklisted in this room.')
 
-        var roomid = room.id
-        var blacklist = settings.blacklist[roomid]
+        const roomid = room.id
+        const blacklist = settings.blacklist[roomid]
         if (!blacklist) return room.say(text + 'No users are blacklisted in this room.')
 
         if (!arg.length) {
-            let userlist = Object.keys(blacklist)
+            const userlist = Object.keys(blacklist)
             if (!userlist.length) return room.say(text + 'No users are blacklisted in this room.')
             return uploadToHastebin('The following users are banned from ' + roomid + ':\n\n' + userlist.join('\n'), link => {
                 if (/^Error/.test(link)) return room.say(text + link)
@@ -390,7 +391,7 @@ var commands: {
             })
         }
 
-        var nick = toId(arg)
+        const nick = toId(arg)
         if (!nick || nick.length > 18) {
             text += 'Invalid username: "' + nick + '".'
         } else {
@@ -403,7 +404,7 @@ var commands: {
         arg = arg.trim().toLowerCase()
         if (!arg) return false
 
-        var tarRoom = room.id
+        let tarRoom = room.id
         if (room === user) {
             if (!user.isExcepted()) return false
             tarRoom = 'global'
@@ -413,7 +414,7 @@ var commands: {
             return false
         }
 
-        var bannedPhrases = settings.bannedphrases ? settings.bannedphrases[tarRoom] : null
+        let bannedPhrases = settings.bannedphrases ? settings.bannedphrases[tarRoom] : null
         if (!bannedPhrases) {
             if (bannedPhrases === null) settings.bannedphrases = {}
             bannedPhrases = (settings.bannedphrases[tarRoom] = {})
@@ -427,7 +428,7 @@ var commands: {
     },
     unbanphrase: 'unbanword',
     unbanword(arg, user, room) {
-        var tarRoom: string
+        let tarRoom: string
         if (room === user) {
             if (!user.isExcepted()) return false
             tarRoom = 'global'
@@ -441,7 +442,7 @@ var commands: {
         if (!arg) return false
         if (!settings.bannedphrases) return room.say('Phrase "' + arg + '" is not currently banned.')
 
-        var bannedPhrases = settings.bannedphrases[tarRoom]
+        const bannedPhrases = settings.bannedphrases[tarRoom]
         if (!bannedPhrases || !bannedPhrases[arg]) return room.say('Phrase "' + arg + '" is not currently banned.')
 
         delete bannedPhrases[arg]
@@ -456,9 +457,9 @@ var commands: {
     viewbannedphrases: 'viewbannedwords',
     vbw: 'viewbannedwords',
     viewbannedwords(arg, user, room) {
-        var tarRoom = room.id
-        var text = ''
-        var bannedFrom = ''
+        let tarRoom = room.id
+        let text = ''
+        let bannedFrom = ''
         if (room === user) {
             if (!user.isExcepted()) return false
             tarRoom = 'global'
@@ -471,7 +472,7 @@ var commands: {
         }
 
         if (!settings.bannedphrases) return room.say(text + 'No phrases are banned in this room.')
-        var bannedPhrases = settings.bannedphrases[tarRoom]
+        const bannedPhrases = settings.bannedphrases[tarRoom]
         if (!bannedPhrases) return room.say(text + 'No phrases are banned in this room.')
 
         if (arg.length) {
@@ -479,7 +480,7 @@ var commands: {
             return room.say(text)
         }
 
-        var banList = Object.keys(bannedPhrases)
+        const banList = Object.keys(bannedPhrases)
         if (!banList.length) return room.say(text + 'No phrases are banned in this room.')
 
         uploadToHastebin('The following phrases are banned ' + bannedFrom + ':\n\n' + banList.join('\n'), link => {
@@ -502,15 +503,15 @@ var commands: {
     joke(arg, user, room) {
         if (room === user || !user.canUse('joke', room.id)) return false
 
-        var reqOpt = {
+        const reqOpt = {
             hostname: 'api.icndb.com',
             path: '/jokes/random',
             method: 'GET'
         }
-        var req = request(reqOpt, res => {
+        const req = request(reqOpt, res => {
             res.on('data', (chunk: string) => {
                 try {
-                    let data = JSON.parse(chunk)
+                    const data = JSON.parse(chunk)
                     room.say(data.value.joke.replace(/&quot;/g, "\""))
                 } catch (e) {
                     room.say('Sorry, couldn\'t fetch a random joke... :(')
@@ -522,12 +523,12 @@ var commands: {
     usage: 'usagestats',
     usagestats(arg, user, room) {
         if (arg) return false
-        var text = (room === user || user.canUse('usagestats', room.id)) ? '' : '/pm ' + user.id + ', '
+        let text = (room === user || user.canUse('usagestats', room.id)) ? '' : '/pm ' + user.id + ', '
         text += 'http://www.smogon.com/stats/2015-07/'
         room.say(text)
     },
     seen(arg, user, room) { // this command is still a bit buggy
-        var text = (room === user ? '' : '/pm ' + user.id + ', ')
+        let text = (room === user ? '' : '/pm ' + user.id + ', ')
         arg = toId(arg)
         if (!arg || arg.length > 18) return room.say(text + 'Invalid username.')
         if (arg === user.id) {
@@ -544,8 +545,8 @@ var commands: {
     },
     '8ball': function (arg, user, room) {
         if (room === user) return false
-        var text = user.canUse('8ball', room.id) ? '' : '/pm ' + user.id + ', '
-        var rand = ~~(20 * Math.random())
+        let text = user.canUse('8ball', room.id) ? '' : '/pm ' + user.id + ', '
+        const rand = ~~(20 * Math.random())
 
         switch (rand) {
              case 0:
@@ -628,16 +629,16 @@ var commands: {
         const args = arg.split(',')
         if (args.length !== 2) return room.say('Not enough rappers were provided. Syntax: .mic [rapper1], [rapper2]')
 
-        var rapper1 = getUser(toId(args[0]))
+        const rapper1 = getUser(toId(args[0]))
         if (!rapper1) return room.say('User ' + args[0].trim() + ' does not exist.')
-        var rapper2 = getUser(toId(args[1]))
+        const rapper2 = getUser(toId(args[1]))
         if (!rapper2) return room.say('User ' + args[1].trim() + ' does not exist.')
 
-        var date = new Date()
-        date = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours() - 4, date.getUTCMinutes(), date.getUTCSeconds())
+        const now = new Date
+        const date = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours() - 4, now.getUTCMinutes(), now.getUTCSeconds())
         if (date.getDay() !== 6) return room.say('Rap battles take place weekly on Saturday night, at 9pm EST (GMT-4).')
 
-        var hours = date.getHours()
+        const hours = date.getHours()
         if (hours !== 21) {
             if (hours > 22 && date.getMinutes() > 30) {
                 return room.say('Rap battles have already taken place.')
@@ -645,19 +646,17 @@ var commands: {
             return room.say('Rap battles will not take place until 9pm EST (GMT-4).')
         }
 
-        rapper1 = rapper1.id
-        rapper2 = rapper2.id
-        var willVoiceR1 = ((<Room> room).users.get(rapper1) === ' ')
-        var willVoiceR2 = ((<Room> room).users.get(rapper2) === ' ')
+        const willVoiceR1 = ((<Room> room).users.get(rapper1.id) === ' ')
+        const willVoiceR2 = ((<Room> room).users.get(rapper2.id) === ' ')
 
-        if (willVoiceR1) room.say('/roomvoice ' + rapper1)
-        if (willVoiceR2) room.say('/roomvoice ' + rapper2)
+        if (willVoiceR1) room.say('/roomvoice ' + rapper1.id)
+        if (willVoiceR2) room.say('/roomvoice ' + rapper2.id)
         room.say('/modchat +')
 
         setTimeout(() => {
-            if (willVoiceR1) room.say('/roomdeauth ' + rapper1)
+            if (willVoiceR1) room.say('/roomdeauth ' + rapper1.id)
             setTimeout(() => {
-                if (willVoiceR2) room.say('/roomdeauth ' + rapper2)
+                if (willVoiceR2) room.say('/roomdeauth ' + rapper2.id)
                 room.say('/modchat false')
             }, 3 * 60 * 1000)
         }, 3 * 60 * 1000)

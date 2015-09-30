@@ -28,25 +28,25 @@ const MIN_CAPS_PROPORTION = 0.8
 
 // TODO: move to rooms.js
 // TODO: store settings by room, not command/blacklists
-export var settings: any
+export let settings: any
 try {
     settings = require('./settings')
 } catch (e) {} // file doesn't exist [yet]
 if (!settings) settings = {}
 
-var actionUrl = parse('https://play.pokemonshowdown.com/~~' + Config.serverid + '/action.php')
+const actionUrl = parse('https://play.pokemonshowdown.com/~~' + Config.serverid + '/action.php')
 // TODO: handle chatdata in users.js
-export var chatData: any = {}
+export const chatData: any = {}
 // TODO: handle blacklists in rooms.js
-var blacklistRegexes: {[roomid: string]: RegExp} = {}
+const blacklistRegexes: {[roomid: string]: RegExp} = {}
 
-var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string) => boolean} = {
+const rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string) => boolean} = {
     challstr(spl: string[], room?: Room, message?: string) {
         info('received challstr, logging in...')
-        var id = spl[2]
-        var str = spl[3]
+        const id = spl[2]
+        const str = spl[3]
 
-        var requestOptions = {
+        const requestOptions = {
             hostname: actionUrl.hostname,
             port: +actionUrl.port,
             path: actionUrl.pathname,
@@ -55,7 +55,7 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
             headers: {}
         }
 
-        var data: string
+        let data: string
         if (!Config.pass) {
             requestOptions.path += '?act=getassertion&userid=' + toId(Config.nick) + '&challengekeyid=' + id + '&challenge=' + str
         } else {
@@ -67,9 +67,9 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
             }
         }
 
-        var req = httpsRequest(requestOptions, res => {
+        const req = httpsRequest(requestOptions, res => {
             res.setEncoding('utf8')
-            var data = ''
+            let data = ''
             res.on('data', (chunk: string) => {
                 data += chunk
             })
@@ -138,8 +138,8 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
         if (!Config.privaterooms) Config.privaterooms = []
 
         if (settings.blacklist) {
-            let blacklist = settings.blacklist
-            for (let room in blacklist) {
+            const blacklist = settings.blacklist
+            for (const room in blacklist) {
                 updateBlacklistRegex(room)
             }
         }
@@ -147,8 +147,8 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
         return true
     },
     c(spl: string[], room: Room) {
-        var username = spl[2]
-        var user = getUser(username)
+        const username = spl[2]
+        const user = getUser(username)
         if (!user) return false; // various "chat" responses contain other data
         if (user === self) return false
         if (isBlacklisted(user.id, room.id)) say(room, '/roomban ' + user.id + ', Blacklisted user')
@@ -159,8 +159,8 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
         return true
     },
     'c:'(spl: string[], room: Room) {
-        var username = spl[3]
-        var user = getUser(username)
+        const username = spl[3]
+        const user = getUser(username)
         if (!user) return false; // various "chat" responses contain other data
         if (user === self) return false
         if (isBlacklisted(user.id, room.id)) say(room, '/roomban ' + user.id + ', Blacklisted user')
@@ -171,10 +171,9 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
         return true
     },
     pm(spl: string[]) {
-        var username = spl[2]
-        var user = getUser(username)
-        var group = username.charAt(0)
-        if (!user) user = addUser(username)
+        const username = spl[2]
+        const user = getUser(username) || addUser(username)
+        const group = username.charAt(0)
         if (user === self) return false
 
         const message = spl.slice(4).join('|')
@@ -183,23 +182,23 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
                 !(toId(message.substr(8)) === 'lobby' && Config.serverid === 'showdown')) {
             return send('|/join ' + message.substr(8))
         }
-        var isCommand = processChatMessage(message, user, user)
+        const isCommand = processChatMessage(message, user, user)
         if (!isCommand) {
             unrecognizedCommand(message, user)
         }
         return true
     },
     N(spl: string[], room: Room) {
-        var username = spl[2]
-        var oldid = spl[3]
-        var user = room.onRename(username, oldid)
+        const username = spl[2]
+        const oldid = spl[3]
+        const user = room.onRename(username, oldid)
         if (isBlacklisted(user.id, room.id)) say(room, '/roomban ' + user.id + ', Blacklisted user')
         updateSeen(oldid, spl[1], user.id)
         return true
     },
     j(spl: string[], room: Room) {
-        var username = spl[2]
-        var user = room.onJoin(username, username.charAt(0))
+        const username = spl[2]
+        const user = room.onJoin(username, username.charAt(0))
         if (user === self) return false
         if (isBlacklisted(user.id, room.id)) say(room, '/roomban ' + user.id + ', Blacklisted user')
         updateSeen(user.id, spl[1], room.id)
@@ -210,8 +209,8 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
         return true
     },
     l(spl: string[], room: Room) {
-        var username = spl[2]
-        var user = room.onLeave(username)
+        const username = spl[2]
+        const user = room.onLeave(username)
         if (user) {
             if (user === self) return false
             updateSeen(user.id, spl[1], room.id)
@@ -225,12 +224,12 @@ var rawCommands: {[name: string]: (spl: string[], room?: Room, message?: string)
         return true
     },
     popup(spl: string[], room: Room) {
-        var parts = spl.slice(2).join('|').split('||||')
+        const parts = spl.slice(2).join('|').split('||||')
         if (!/ user auth:$/.test(parts[0])) return
-        for (var i = 1; i < parts.length; i++) {
-            var part = parts[i]
-            var roomAuthMessage = "Room auth: "
-            var privateRoomAuthMessage = "Private room auth: "
+        for (let i = 1; i < parts.length; i++) {
+            const part = parts[i]
+            const roomAuthMessage = "Room auth: "
+            const privateRoomAuthMessage = "Private room auth: "
             if (part.slice(0, roomAuthMessage.length) === roomAuthMessage) {
                 Config.rooms = part.slice(roomAuthMessage.length).split(', ')
             } else if (part.slice(0, privateRoomAuthMessage.length) === privateRoomAuthMessage) {
@@ -248,19 +247,19 @@ export function parseData(data: string) {
 function splitMessage(message: string) {
     if (!message) return
 
-    var room: Room = null
+    let room: Room = null
     if (message.indexOf('\n') < 0) {
         parseMessage(message, room)
         return
     }
 
-    var spl = message.split('\n')
+    const spl = message.split('\n')
     if (spl[0].charAt(0) === '>') {
         if (spl[1].substr(1, 10) === 'tournament') return false
-        let roomid = spl.shift().substr(1)
+        const roomid = spl.shift().substr(1)
         room = getRoom(roomid)
         if (spl[0].substr(1, 4) === 'init') {
-            let users = spl[2].substr(7)
+            const users = spl[2].substr(7)
             room = addRoom(roomid, (Config.rooms || []).indexOf(roomid) === -1)
             room.onUserlist(users)
             ok('joined ' + room.id)
@@ -280,14 +279,14 @@ function parseMessage(message: string, room?: Room) {
     }
 }
 function processChatMessage(message: string, user: User, room: Room) {
-    var cmdrMessage = '["' + room.id + '|' + user.name + '|' + message + '"]'
+    const cmdrMessage = '["' + room.id + '|' + user.name + '|' + message + '"]'
     message = message.trim()
     if (message.substr(0, Config.commandcharacter.length) !== Config.commandcharacter) return false
 
     message = message.substr(Config.commandcharacter.length)
-    var index = message.indexOf(' ')
-    var arg = ''
-    var cmd = message
+    const index = message.indexOf(' ')
+    let arg = ''
+    let cmd = message
     if (index > -1) {
         cmd = cmd.substr(0, index)
         arg = message.substr(index + 1).trim()
@@ -308,7 +307,7 @@ function processChatMessage(message: string, user: User, room: Room) {
     return true
 }
 function say(target: Room, text: string) {
-    var targetId = target.id
+    const targetId = target.id
     if (getRoom(targetId)) {
         send((targetId !== 'lobby' ? targetId : '') + '|' + text)
     } else {
@@ -316,11 +315,11 @@ function say(target: Room, text: string) {
     }
 }
 function isBlacklisted(userid: string, roomid: string) {
-    var blacklistRegex = blacklistRegexes[roomid]
+    const blacklistRegex = blacklistRegexes[roomid]
     return blacklistRegex && blacklistRegex.test(userid)
 }
 export function blacklistUser(userid: string, roomid: string) {
-    var blacklist = settings.blacklist || (settings.blacklist = {})
+    const blacklist = settings.blacklist || (settings.blacklist = {})
     if (blacklist[roomid]) {
         if (blacklist[roomid][userid]) return false
     } else {
@@ -332,7 +331,7 @@ export function blacklistUser(userid: string, roomid: string) {
     return true
 }
 export function unblacklistUser(userid: string, roomid: string) {
-    var blacklist = settings.blacklist
+    const blacklist = settings.blacklist
     if (!blacklist || !blacklist[roomid] || !blacklist[roomid][userid]) return false
 
     delete blacklist[roomid][userid]
@@ -345,9 +344,9 @@ export function unblacklistUser(userid: string, roomid: string) {
     return true
 }
 function updateBlacklistRegex(roomid: string) {
-    var blacklist = settings.blacklist[roomid]
-    var buffer: string[] = []
-    for (let entry in blacklist) {
+    const blacklist = settings.blacklist[roomid]
+    const buffer: string[] = []
+    for (const entry in blacklist) {
         if (entry.startsWith('/') && entry.endsWith('/i')) {
             buffer.push(entry.slice(1, -2))
         } else {
@@ -358,17 +357,17 @@ function updateBlacklistRegex(roomid: string) {
 }
 export function uploadToHastebin(toUpload: string, callback: (result: string) => void) {
     if (typeof callback !== 'function') return false
-    var reqOpts = {
+    const reqOpts = {
         hostname: 'hastebin.com',
         method: 'POST',
         path: '/documents'
     }
 
-    var req = httpRequest(reqOpts, function (res) {
+    const req = httpRequest(reqOpts, function (res) {
         res.on('data', (chunk: string) => {
             // CloudFlare can go to hell for sending the body in a header request like this
             if (typeof chunk === 'string' && chunk.substr(0, 15) === '<!DOCTYPE html>') return callback('Error uploading to Hastebin.')
-            var filename = JSON.parse(chunk.toString()).key
+            const filename = JSON.parse(chunk.toString()).key
             callback('http://hastebin.com/raw/' + filename)
         })
     })
@@ -383,33 +382,33 @@ function processChatData(userid: string, roomid: string, msg: string) {
     // NOTE: this is still in early stages
     msg = msg.trim().replace(/[ \u0000\u200B-\u200F]+/g, ' '); // removes extra spaces and null characters so messages that should trigger stretching do so
     updateSeen(userid, 'c', roomid)
-    var now = Date.now()
+    const now = Date.now()
     if (!chatData[userid]) chatData[userid] = {
         zeroTol: 0,
         lastSeen: '',
         seenAt: now
     }
-    var userData = chatData[userid]
+    const userData = chatData[userid]
     if (!userData[roomid]) userData[roomid] = {
         times: [],
         points: 0,
         lastAction: 0
     }
-    var roomData = userData[roomid]
+    const roomData = userData[roomid]
 
     roomData.times.push(now)
 
     // this deals with punishing rulebreakers, but note that the bot can't think, so it might make mistakes
     if (Config.allowmute && self.hasRank(roomid, '%') && Config.whitelist.indexOf(userid) < 0) {
-        let useDefault = !(settings.modding && settings.modding[roomid])
+        const useDefault = !(settings.modding && settings.modding[roomid])
         let pointVal = 0
         let muteMessage = ''
-        let modSettings = useDefault ? null : settings.modding[roomid]
+        const modSettings = useDefault ? null : settings.modding[roomid]
 
         // moderation for banned words
         if ((useDefault || !settings.banword[roomid]) && pointVal < 2) {
-            let bannedPhraseSettings = settings.bannedphrases
-            let bannedPhrases = !!bannedPhraseSettings ? (Object.keys(bannedPhraseSettings[roomid] || {})).concat(Object.keys(bannedPhraseSettings.global || {})) : []
+            const bannedPhraseSettings = settings.bannedphrases
+            const bannedPhrases = !!bannedPhraseSettings ? (Object.keys(bannedPhraseSettings[roomid] || {})).concat(Object.keys(bannedPhraseSettings.global || {})) : []
             for (let bannedPhrase of bannedPhrases) {
                 if (msg.toLowerCase().indexOf(bannedPhrase) > -1) {
                     pointVal = 2
@@ -419,9 +418,9 @@ function processChatData(userid: string, roomid: string, msg: string) {
             }
         }
         // moderation for flooding (more than x lines in y seconds)
-        let times = roomData.times
-        let timesLen = times.length
-        let isFlooding = (timesLen >= FLOOD_MESSAGE_NUM && (now - times[timesLen - FLOOD_MESSAGE_NUM]) < FLOOD_MESSAGE_TIME &&
+        const times = roomData.times
+        const timesLen = times.length
+        const isFlooding = (timesLen >= FLOOD_MESSAGE_NUM && (now - times[timesLen - FLOOD_MESSAGE_NUM]) < FLOOD_MESSAGE_TIME &&
             (now - times[timesLen - FLOOD_MESSAGE_NUM]) > (FLOOD_PER_MSG_MIN * FLOOD_MESSAGE_NUM))
         if ((useDefault || !('flooding' in modSettings)) && isFlooding) {
             if (pointVal < 2) {
@@ -430,7 +429,7 @@ function processChatData(userid: string, roomid: string, msg: string) {
             }
         }
         // moderation for caps (over x% of the letters in a line of y characters are capital)
-        let capsMatch = msg.replace(/[^A-Za-z]/g, '').match(/[A-Z]/g)
+        const capsMatch = msg.replace(/[^A-Za-z]/g, '').match(/[A-Z]/g)
         if ((useDefault || !('caps' in modSettings)) && capsMatch && toId(msg).length > MIN_CAPS_LENGTH && (capsMatch.length >= ~~(toId(msg).length * MIN_CAPS_PROPORTION))) {
             if (pointVal < 1) {
                 pointVal = 1
@@ -438,7 +437,7 @@ function processChatData(userid: string, roomid: string, msg: string) {
             }
         }
         // moderation for stretching (over x consecutive characters in the message are the same)
-        let stretchMatch = /(.)\1{7,}/gi.test(msg) || /(..+)\1{4,}/gi.test(msg); // matches the same character (or group of characters) 8 (or 5) or more times in a row
+        const stretchMatch = /(.)\1{7,}/gi.test(msg) || /(..+)\1{4,}/gi.test(msg); // matches the same character (or group of characters) 8 (or 5) or more times in a row
         if ((useDefault || !('stretching' in modSettings)) && stretchMatch) {
             if (pointVal < 1) {
                 pointVal = 1
@@ -446,7 +445,7 @@ function processChatData(userid: string, roomid: string, msg: string) {
             }
         }
         // moderation for group chat links
-        let groupChatMatch = /(?:\bplay\.pokemonshowdown\.com\/|\bpsim\.us\/|<<)groupchat-/i.test(msg);
+        const groupChatMatch = /(?:\bplay\.pokemonshowdown\.com\/|\bpsim\.us\/|<<)groupchat-/i.test(msg);
         if ((useDefault || !('groupchat' in modSettings)) && groupChatMatch) {
             if (pointVal < 1) {
                 pointVal = 1
@@ -478,18 +477,18 @@ function processChatData(userid: string, roomid: string, msg: string) {
     }
 }
 function cleanChatData() {
-    for (let user in chatData) {
-        for (let room in chatData[user]) {
-            let roomData = chatData[user][room]
+    for (const user in chatData) {
+        for (const room in chatData[user]) {
+            const roomData = chatData[user][room]
             if (!roomData) continue
 
             if (!roomData.times || !roomData.times.length) {
                 delete chatData[user][room]
                 continue
             }
-            let newTimes: number[] = []
-            let now = Date.now()
-            let times = roomData.times
+            const newTimes: number[] = []
+            const now = Date.now()
+            const times = roomData.times
             for (let time of times) {
                 if (now - time < 5 * 1000) newTimes.push(time)
             }
@@ -504,15 +503,15 @@ function cleanChatData() {
 
 function updateSeen(user: string, type: string, detail: string) {
     if (type !== 'n' && Config.rooms.indexOf(detail) < 0 || Config.privaterooms.indexOf(detail) > -1) return
-    var now = Date.now()
+    const now = Date.now()
     if (!chatData[user]) chatData[user] = {
         zeroTol: 0,
         lastSeen: '',
         seenAt: now
     }
     if (!detail) return
-    var userData = chatData[user]
-    var msg = ''
+    const userData = chatData[user]
+    let msg = ''
     switch (type) {
     case 'j':
     case 'J':
@@ -538,19 +537,19 @@ function updateSeen(user: string, type: string, detail: string) {
 export function getTimeAgo(time: number) {
     time = ~~((Date.now() - time) / 1000)
 
-    var seconds = time % 60
-    var times: string[] = []
+    const seconds = time % 60
+    const times: string[] = []
     if (seconds) times.push(seconds + (seconds === 1 ? ' second': ' seconds'))
     if (time >= 60) {
         time = ~~((time - seconds) / 60)
-        let minutes = time % 60
+        const minutes = time % 60
         if (minutes) times.unshift(minutes + (minutes === 1 ? ' minute' : ' minutes'))
         if (time >= 60) {
             time = ~~((time - minutes) / 60)
-            let hours = time % 24
+            const hours = time % 24
             if (hours) times.unshift(hours + (hours === 1 ? ' hour' : ' hours'))
             if (time >= 24) {
-                let days = ~~((time - hours) / 24)
+                const days = ~~((time - hours) / 24)
                 if (days) times.unshift(days + (days === 1 ? ' day' : ' days'))
             }
         }
@@ -560,8 +559,8 @@ export function getTimeAgo(time: number) {
 }
 
 // Writing settings
-var writing = false
-var writePending = false; // whether or not a new write is pending
+let writing = false
+let writePending = false // whether or not a new write is pending
 function finishWriting() {
     writing = false
     if (writePending) {
@@ -575,7 +574,7 @@ export function writeSettings() {
         return
     }
     writing = true
-    var data = JSON.stringify(settings)
+    const data = JSON.stringify(settings)
     writeFile('settings.json.0', data, function () {
         // rename is atomic on POSIX, but will throw an error on Windows
         rename('settings.json.0', 'settings.json', function (err) {
@@ -590,8 +589,8 @@ export function writeSettings() {
 }
 function unrecognizedCommand(message: string, user: User) {
     if (user.id === self.id) return
-    var failureMessage: string
-    var scavengers = getRoom('scavengers')
+    let failureMessage: string
+    const scavengers = getRoom('scavengers')
     if (scavengers && scavengers.users.has(user.id) && /\b(?:starthunt|[hp]astebin)\b/i.test(message)) {
         failureMessage = "Thank you for submitting a hunt, but I'm just a bot. Please PM some other staff member to start your hunt."
     } else {
