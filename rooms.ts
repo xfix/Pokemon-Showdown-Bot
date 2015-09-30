@@ -25,6 +25,7 @@ export class Room {
     id: string
     isPrivate: boolean
     users = new Map<string, string>()
+    buzzer: NodeJS.Timer = null
 
     constructor(roomid: string, type: boolean) {
         this.id = roomid

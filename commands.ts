@@ -26,6 +26,7 @@ const CONFIGURABLE_COMMANDS: {[name: string]: boolean} = {
     usagestats: true,
     '8ball': true,
     studio: true,
+    buzz: true,
 }
 
 const CONFIGURABLE_MODERATION_OPTIONS: {[name: string]: boolean} = {
@@ -649,6 +650,31 @@ const commands: {
                 room.say('/modchat false')
             }, 3 * 60 * 1000)
         }, 3 * 60 * 1000)
+    },
+
+    /**
+    * Jeopardy commands
+    *
+    * The following commands are used for Jeopardy in the Academics room
+    * on the Smogon server.
+    */
+
+
+    b: 'buzz',
+    buzz: function (arg, user, room) {
+        if ((<Room> room).buzzer || room === user || !user.canUse('buzz', room.id)) return false
+
+        room.say('**' + user.name + ' has buzzed in!**')
+        ;(<Room> room).buzzer = setTimeout(() => {
+            room.say(`${user.name}, your time to answer is up!`)
+            ;(<Room> room).buzzer = null
+        }, 7 * 1000);
+    },
+    reset: function (arg, user, room) {
+        if (!(<Room> room).buzzer || room === user || !user.hasRank(room.id, '%')) return false
+        clearTimeout((<Room> room).buzzer)
+        ;(<Room> room).buzzer = null
+        room.say('The buzzer has been reset.')
     },
 }
 export default commands
