@@ -661,19 +661,19 @@ const commands: {
 
 
     b: 'buzz',
-    buzz: function (arg, user, room) {
-        if ((<Room> room).buzzer || room === user || !user.canUse('buzz', room.id)) return false
+    buzz(arg: string, user: User, room: Room) {
+        if (!(room instanceof Room) || room.buzzer || !user.canUse('buzz', room.id)) return false
 
         room.say('**' + user.name + ' has buzzed in!**')
-        ;(<Room> room).buzzer = setTimeout(() => {
+        room.buzzer = setTimeout(() => {
             room.say(`${user.name}, your time to answer is up!`)
-            ;(<Room> room).buzzer = null
+            room.buzzer = null
         }, 7 * 1000)
     },
-    reset: function (arg, user, room) {
-        if (!(<Room> room).buzzer || room === user || !user.hasRank(room.id, '%')) return false
-        clearTimeout((<Room> room).buzzer)
-        ;(<Room> room).buzzer = null
+    reset(arg: string, user: User, room: Room) {
+        if (!(room instanceof Room) || !room.buzzer  || !user.hasRank(room.id, '%')) return false
+        clearTimeout(room.buzzer)
+        room.buzzer = null
         room.say('The buzzer has been reset.')
     },
 }
