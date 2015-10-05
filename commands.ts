@@ -316,14 +316,17 @@ const commands: {
         if (!self.hasRank(room.id, '@')) return room.say(self.name + ' requires rank of @ or higher to (un)blacklist.')
         if (!arg) return room.say('You must specify a regular expression to (un)blacklist.')
 
+        let regularExpression: RegExp
         try {
-            new RegExp(arg, 'i')
+            regularExpression = new RegExp(arg, 'i')
         } catch (e) {
             return room.say(e.message)
         }
 
-        if (/^(?:(?:\.+|[a-z0-9]|\\[a-z0-9SbB])(?![a-z0-9\.\\])(?:\*|\{\d+\,(?:\d+)?\}))+$/i.test(arg)) {
-            return room.say('Regular expression /' + arg + '/i cannot be added to the blacklist. Don\'t be Machiavellian!')
+        // Detect regular expressions that match too much. Slayer95 was added,
+        // as his nick has digits, and is unlikely to ever become malicious.
+        if (regularExpression.test('xfix') || regularExpression.test('slayer95') || regularExpression.test(user.id)) {
+            return room.say('Regular expression /' + arg + '/i cannot be added to the blacklist as it\'s not specific enough.')
         }
 
         const regex = '/' + arg + '/i'
