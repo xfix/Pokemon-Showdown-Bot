@@ -517,7 +517,7 @@ const commands: {
     usagestats(arg, user, room) {
         if (arg) return false
         let text = (room === user || user.canUse('usagestats', room.id)) ? '' : '/pm ' + user.id + ', '
-        text += 'http://www.smogon.com/stats/2015-08/'
+        text += 'http://www.smogon.com/stats/2015-09/'
         room.say(text)
     },
     seen(arg, user, room) { // this command is still a bit buggy
