@@ -166,7 +166,7 @@ const rawCommands: {[name: string]: (spl: string[], room?: Room, message?: strin
         if (isBlacklisted(user.id, room.id)) say(room, '/roomban ' + user.id + ', Blacklisted user')
 
         const message = spl.slice(4).join('|')
-        if (!user.hasRank(room.id, '%')) processChatData(user.id, room.id, message)
+        if (!user.hasRank(room.id, '%')) processChatData(user.id, room.id, message, +spl[2] * 1000)
         processChatMessage(message, user, room)
         return true
     },
@@ -378,11 +378,10 @@ export function uploadToHastebin(toUpload: string, callback: (result: string) =>
     req.write(toUpload)
     req.end()
 }
-function processChatData(userid: string, roomid: string, msg: string) {
+function processChatData(userid: string, roomid: string, msg: string, now = Date.now()) {
     // NOTE: this is still in early stages
     msg = msg.trim().replace(/[ \u0000\u200B-\u200F]+/g, ' ') // removes extra spaces and null characters so messages that should trigger stretching do so
     updateSeen(userid, 'c', roomid)
-    const now = Date.now()
     if (!chatData[userid]) chatData[userid] = {
         zeroTol: 0,
         lastSeen: '',
