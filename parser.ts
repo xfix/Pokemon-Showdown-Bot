@@ -236,7 +236,10 @@ const rawCommands: {[name: string]: (spl: string[], room?: Room, message?: strin
             if (part.slice(0, roomAuthMessage.length) === roomAuthMessage) {
                 Config.rooms = part.slice(roomAuthMessage.length).split(', ')
             } else if (isPrivate || isHidden) {
-                Config.privaterooms = part.slice(privateRoomAuthMessage.length).split(', ')
+                if (!Config.privaterooms) {
+                    Config.privaterooms = []
+                }
+                Config.privaterooms.push(...part.slice(privateRoomAuthMessage.length).split(', '))
             }
         }
         joinRooms()
