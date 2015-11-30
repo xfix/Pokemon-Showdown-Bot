@@ -226,21 +226,19 @@ const rawCommands: {[name: string]: (spl: string[], room?: Room, message?: strin
     popup(spl: string[], room: Room) {
         const parts = spl.slice(2).join('|').split('||||')
         if (!/ auth:$/.test(parts[0])) return
+        Config.privaterooms = []
         for (let i = 1; i < parts.length; i++) {
             const part = parts[i]
             const roomAuthMessage = "Room auth: "
             const privateRoomAuthMessage = "Private room auth: "
             const hiddenRoomAuthMessage = "Hidden room auth: "
             const globalAuthMessage = "Global auth: "
-            const isPrivate = part.slice(0, privateRoomAuthMessage.length) === privateRoomAuthMessage
-            const isHidden = part.slice(0, hiddenRoomAuthMessage.length) === hiddenRoomAuthMessage
             if (part.slice(0, roomAuthMessage.length) === roomAuthMessage) {
                 Config.rooms = part.slice(roomAuthMessage.length).split(', ')
-            } else if (isPrivate || isHidden) {
-                if (!Config.privaterooms) {
-                    Config.privaterooms = []
-                }
+            } else if (part.slice(0, privateRoomAuthMessage.length) === privateRoomAuthMessage) {
                 Config.privaterooms.push(...part.slice(privateRoomAuthMessage.length).split(', '))
+            } else if (part.slice(0, hiddenRoomAuthMessage.length) === hiddenRoomAuthMessage) {
+                Config.privaterooms.push(...part.slice(hiddenRoomAuthMessage.length).split(', '))
             } else if (part.slice(0, globalAuthMessage.length) === globalAuthMessage) {
                 if (part.slice(globalAuthMessage.length) !== '+') {
                     throw new Error("This bot doesn't support global staff promotions")
