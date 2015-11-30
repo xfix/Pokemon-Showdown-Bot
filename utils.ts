@@ -68,7 +68,7 @@ export function getServerInformation(host: string, callback: (server: string, po
             if (!configuration) {
                 fail(new Error("Got unexpected response"))
             }
-            const parsedConfiguration = JSON.parse(configuration[1])
+            const parsedConfiguration = JSON.parse(JSON.parse(configuration[1]))
             callback(parsedConfiguration.host, parsedConfiguration.port)
         })
         result.on('end', () => {
