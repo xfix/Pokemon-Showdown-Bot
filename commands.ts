@@ -654,6 +654,17 @@ const commands: {
             }, 3 * 60 * 1000)
         }, 3 * 60 * 1000)
     },
+    calc: 'damagecalc',
+    damagecalc(arg, user, room) {
+        if (room === user || !user.canUse('damagecalc', room.id)) return false
+        let text: string
+        if (arg) {
+            text = 'Damage calculator to be implemented. Until then, refer to https://pokemonshowdown.com/damagecalc/'
+        } else {
+            text = 'https://pokemonshowdown.com/damagecalc/'
+        }
+        room.say(text)
+    },
 
     /**
     * Jeopardy commands
