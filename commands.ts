@@ -690,5 +690,13 @@ const commands: {
         room.buzzer = null
         room.say('The buzzer has been reset.')
     },
+
+    /**
+     * Scavengers commands
+     */
+    zip(arg, user, room) {
+        const target = room.id === 'scavengers' && user.canUse('zip', room.id) ? room : user
+        target.say('Zipzapadam: Quality Hunts since 1969')
+    },
 }
 export default commands
