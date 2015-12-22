@@ -166,6 +166,7 @@ const rawCommands: {[name: string]: (spl: string[], room?: Room, message?: strin
         if (isBlacklisted(user.id, room.id)) say(room, '/roomban ' + user.id + ', Blacklisted user')
 
         const message = spl.slice(4).join('|')
+        updateSeen(user.id, 'c', room.id)
         if (!user.hasRank(room.id, '%')) processChatData(user.id, room.id, message, +spl[2] * 1000)
         processChatMessage(message, user, room)
         return true
@@ -234,7 +235,7 @@ const rawCommands: {[name: string]: (spl: string[], room?: Room, message?: strin
             const hiddenRoomAuthMessage = "Hidden room auth: "
             const globalAuthMessage = "Global auth: "
             if (part.slice(0, roomAuthMessage.length) === roomAuthMessage) {
-                Config.rooms = part.slice(roomAuthMessage.length).split(', ')
+                Config.rooms = part.slice(roomAuthMessage.length).split(', ').map(toId)
             } else if (part.slice(0, privateRoomAuthMessage.length) === privateRoomAuthMessage) {
                 Config.privaterooms.push(...part.slice(privateRoomAuthMessage.length).split(', '))
             } else if (part.slice(0, hiddenRoomAuthMessage.length) === hiddenRoomAuthMessage) {
@@ -244,6 +245,8 @@ const rawCommands: {[name: string]: (spl: string[], room?: Room, message?: strin
                     throw new Error("This bot doesn't support global staff promotions")
                 }
             }
+            Config.privaterooms = Config.privaterooms.map(toId)
+
         }
         joinRooms()
         return true
@@ -390,7 +393,6 @@ export function uploadToHastebin(toUpload: string, callback: (result: string) =>
 function processChatData(userid: string, roomid: string, msg: string, now = Date.now()) {
     // NOTE: this is still in early stages
     msg = msg.trim().replace(/[ \u0000\u200B-\u200F]+/g, ' ') // removes extra spaces and null characters so messages that should trigger stretching do so
-    updateSeen(userid, 'c', roomid)
     if (!chatData[userid]) chatData[userid] = {
         zeroTol: 0,
         lastSeen: '',
