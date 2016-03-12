@@ -464,6 +464,12 @@ function processChatData(userid: string, roomid: string, msg: string, now = Date
         }
 
         if (pointVal > 0 && now - roomData.lastAction >= ACTION_COOLDOWN) {
+            const room = getRoom(roomid)
+            if (roomid === 'japanese') {
+                if ((<any> Array).from(room.users).find(([name, rank]) => name !== 'usainbot' && ' +!‽'.indexOf(rank) === -1)) {
+                    pointVal += 1
+                }
+            }
             let cmd = 'mute'
             // defaults to the next punishment in Config.punishVals instead of repeating the same action (so a second warn-worthy
             // offence would result in a mute instead of a warn, and the third an hourmute, etc)
@@ -482,7 +488,7 @@ function processChatData(userid: string, roomid: string, msg: string, now = Date
             }
             if (roomData.points > 1) userData.zeroTol++ // getting muted or higher increases your zero tolerance level (warns do not)
             roomData.lastAction = now
-            say(getRoom(roomid), '/' + cmd + ' ' + userid + muteMessage)
+            say(room, '/' + cmd + ' ' + userid + muteMessage)
         }
     }
 }
