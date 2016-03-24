@@ -39,7 +39,7 @@ export class User {
 
     hasRank (roomid: string, tarGroup: string) {
         if (this.isExcepted()) return true
-        const group = this.rooms.get(roomid) || roomid // PM messages use the roomid parameter as the user's group
+        const group = getRoom(roomid).users.get(this.id) || roomid // PM messages use the roomid parameter as the user's group
         return Config.groups[group] >= Config.groups[tarGroup]
     }
 
