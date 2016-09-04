@@ -133,7 +133,7 @@ const commands: {
         do {
             const divisor = divisors.pop()
             const unit = uptime % divisor
-            buffer.push(unit > 1 ? unit + ' ' + units.pop() + 's' : unit + ' ' + units.pop())
+            buffer.push(unit + ' ' + (unit !== 1 ? units.pop() + 's' : units.pop()))
             uptime = ~~(uptime / divisor)
         } while (uptime)
 
